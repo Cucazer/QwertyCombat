@@ -6,51 +6,52 @@ namespace QwertyCombat
 {
 	public class MainForm : Form
 	{
-		public MainForm()
+        public Drawable pictureMap;
+
+        private Label labelObjectDescription;
+        private Button buttonEndTurn;
+        private Label labelPlayerTurn;
+        private Label labelShipsAlive;
+        private Label labelBlueShipsAlive;
+        private Label labelRedShipsAlive;
+        private Button buttonDebug;
+        private CheckBox checkBoxAudio;
+
+        public MainForm()
 		{
-			Title = "My Eto Form";
-			ClientSize = new Size(400, 350);
+            Title = "QWERTY Combat";
+            ClientSize = new Size(400, 350);
+            MinimumSize = new Size(400, 350);
 
-			Content = new TableLayout
-			{
-				Padding = 10,
-				Rows = {
-					null,
-					// row with three columns
-					new TableRow(null, new Label { Text = "Hello World!" }, null),
-					null
-				}
-			};
+            this.pictureMap = new Drawable { Height = 300, Width = 400, BackgroundColor = Colors.LightBlue };
+            this.pictureMap.MouseUp += (sender, e) => { MessageBox.Show($"{e.Location}"); };
 
-			// create a few commands that can be used for the menu and toolbar
-			var clickMe = new Command { MenuText = "Click Me!", ToolBarText = "Click Me!" };
-			clickMe.Executed += (sender, e) => MessageBox.Show(this, "I was clicked!");
+            this.labelPlayerTurn = new Label { Text = "First player's turn" };
 
-			var quitCommand = new Command { MenuText = "Quit", Shortcut = Application.Instance.CommonModifier | Keys.Q };
-			quitCommand.Executed += (sender, e) => Application.Instance.Quit();
-			
-			var aboutCommand = new Command { MenuText = "About..." };
-			aboutCommand.Executed += (sender, e) => MessageBox.Show(this, "About my app...");
-					
-			// create menu
-			Menu = new MenuBar
-			{
-				Items = {
-					// File submenu
-					new ButtonMenuItem { Text = "&File", Items = { clickMe } },
-					// new ButtonMenuItem { Text = "&Edit", Items = { /* commands/items */ } },
-					// new ButtonMenuItem { Text = "&View", Items = { /* commands/items */ } },
-				},
-				ApplicationItems = {
-					// application (OS X) or file menu (others)
-					new ButtonMenuItem { Text = "&Preferences..." },
-				},
-				QuitItem = quitCommand,
-				AboutItem = aboutCommand
-			};
-			
-			// create toolbar			
-			ToolBar = new ToolBar { Items = { clickMe } };
-		}
+            var controlsLayout = new TableLayout
+            {
+                Rows =
+                {
+                    new Button { Text = "DEBUG", Visible = false},
+                    new Label { Text = "Description" },
+                    this.labelPlayerTurn,
+                    new Label { Text = "Ships alive:" },
+                    new CheckBox { Text = "Audio" },
+                    null
+                },
+                Spacing = new Size(10, 10),
+                Padding = new Padding(10),
+                Width = 200
+            };
+
+            var endTurnBtn = new Button { Text = "End turn" };
+            endTurnBtn.Click += (sender, e) => this.labelPlayerTurn.Text = this.labelPlayerTurn.Text.Contains("First") ? "Second player's turn" : "First player's turn";
+
+            var fieldLayout = new TableLayout { Rows = { TableLayout.AutoSized(this.pictureMap, centered: true), TableLayout.AutoSized(endTurnBtn, centered: true), null }, Spacing = new Size(10, 10) };
+
+            var layout = new TableLayout(new TableRow(controlsLayout, fieldLayout));
+
+            Content = layout;
+        }
 	}
 }
