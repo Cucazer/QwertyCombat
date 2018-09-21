@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using qwerty.Objects.Weapons;
+using Eto.Drawing;
+using QwertyCombat.Objects.Weapons;
 
-namespace qwerty.Objects
+namespace QwertyCombat.Objects
 {
     class ShipAssaulter : Ship
     {

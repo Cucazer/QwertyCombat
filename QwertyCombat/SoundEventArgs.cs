@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace qwerty
+namespace QwertyCombat
 {
     class SoundEventArgs: EventArgs
     {

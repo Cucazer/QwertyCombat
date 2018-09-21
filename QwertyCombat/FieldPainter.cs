@@ -1,15 +1,14 @@
 ﻿﻿using System;
- using System.Collections.Generic;
- using System.Drawing;
-using System.Drawing.Imaging;
+using System.Collections.Generic;
+using Eto.Drawing;
 using System.Linq;
 using Barbar.HexGrid;
-using qwerty.Objects;
-using Point = System.Drawing.Point;
+using QwertyCombat.Objects;
+using Point = Eto.Drawing.Point;
 using System.Threading;
- using qwerty.Objects.Weapons;
+using QwertyCombat.Objects.Weapons;
 
-namespace qwerty
+namespace QwertyCombat
 {
     class FieldPainter
     {
@@ -24,7 +23,7 @@ namespace qwerty
         public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
         {
             this.objectManager = objectManager;
-            this.CurrentBitmap = new Bitmap(fieldWidth, fieldHeight, PixelFormat.Format32bppArgb);
+            this.CurrentBitmap = new Bitmap(fieldWidth, fieldHeight, PixelFormat.Format32bppRgba);
         }
 
         public void UpdateBitmap(AnimationEventArgs animationToPerform = null)  
@@ -54,7 +53,7 @@ namespace qwerty
 
         public void DrawField()
         {
-            Graphics g = Graphics.FromImage(this.CurrentBitmap);
+            Graphics g = new Graphics(this.CurrentBitmap);
             g.FillRectangle(Brushes.Black, 0, 0, this.CurrentBitmap.Width, this.CurrentBitmap.Height);
 
             foreach (var hexagonCorners in this.combatMap.AllHexagonCorners)
@@ -65,14 +64,14 @@ namespace qwerty
             if (this.objectManager.ActiveShip != null)
             {
                 // highlight active ship attack range
-                Pen redPen = new Pen(Color.Red, 1);
+                Pen redPen = new Pen(Colors.Red, 1);
                 foreach (var hexagonCorners in this.combatMap.GetAllHexagonCornersInRange(this.objectManager.ActiveShip.ObjectCoordinates, this.objectManager.ActiveShip.EquippedWeapon.AttackRange))
                 {
                     g.DrawPolygon(redPen, hexagonCorners);
                 }
 
                 // highlight active ship
-                Pen activeShipAriaPen = new Pen(Color.Purple, 5);
+                Pen activeShipAriaPen = new Pen(Colors.Purple, 5);
                 g.DrawPolygon(activeShipAriaPen, this.combatMap.GetHexagonCorners(this.objectManager.ActiveShip.ObjectCoordinates.Column,
                                                           this.objectManager.ActiveShip.ObjectCoordinates.Row));
             }
@@ -100,11 +99,10 @@ namespace qwerty
             {
                 for (int y = 0; y < this.combatMap.FieldHeight; y++)
                 {
-                    g.DrawString($"C{x}R{y}", new Font("Arial", 7), Brushes.DeepSkyBlue, this.combatMap.GetHexagonCorners(x,y)[2]);
+                    g.DrawText(new Font("Arial", 7), Brushes.DeepSkyBlue, this.combatMap.GetHexagonCorners(x,y)[2], $"C{x}R{y}");
                     
                     var cubeCoordinates = this.combatMap.HexGrid.ToCubeCoordinates(new OffsetCoordinates(x, y));
-                    g.DrawString($"Q{cubeCoordinates.Q}R{cubeCoordinates.R}S{cubeCoordinates.S}", new Font("Arial", 7),
-                        Brushes.DeepSkyBlue, PointF.Add(this.combatMap.GetHexagonCorners(x, y)[4], new Size(0, -12)));
+                    g.DrawText(new Font("Arial", 7), Brushes.DeepSkyBlue, this.combatMap.GetHexagonCorners(x, y)[4] + new Size(0, -12), $"Q{cubeCoordinates.Q}R{cubeCoordinates.R}S{cubeCoordinates.S}");
                 }
             }
 #endif
@@ -139,11 +137,10 @@ namespace qwerty
         private void DrawMeteor(Meteor meteor, Point meteorCoordinates)
         {
             var meteorRadius = 15;
-            Graphics g = Graphics.FromImage(this.CurrentBitmap);
+            Graphics g = new Graphics(this.CurrentBitmap);
             g.FillEllipse(Brushes.Gray,
-                new Rectangle(Point.Subtract(meteorCoordinates, new Size(meteorRadius, meteorRadius)), new Size(2 * meteorRadius, 2 * meteorRadius)));
-            g.DrawString(meteor.CurrentHealth.ToString(), new Font("Arial", 8.0F), Brushes.Red,
-                Point.Add(meteorCoordinates, new Size(5, -25)));
+                new Rectangle(meteorCoordinates - meteorRadius, new Size(2 * meteorRadius, 2 * meteorRadius)));
+            g.DrawText(new Font("Arial", 8.0F), Brushes.Red, meteorCoordinates +  new Size(5, -25), meteor.CurrentHealth.ToString());
             // TODO: better indicate meteor's way
             var directionAngle = 60 * (int) meteor.MovementDirection - 30;
             var directionAngleRadians = (float)directionAngle / 180 * Math.PI;
@@ -161,12 +158,11 @@ namespace qwerty
             {
                 var beamStartPoint = new Point((int)(meteorRadius * Math.Cos(beamStartAngle)),
                     (int)(-meteorRadius * Math.Sin(beamStartAngle)));
-                var beamEndPoint = Point.Add(beamStartPoint,
-                    new Size((int) (-20 * Math.Cos(directionAngleRadians)), (int) (20 * Math.Sin(directionAngleRadians))));
-                g.DrawLine(new Pen(Color.Yellow, 2), Point.Add(meteorCoordinates, new Size(beamStartPoint)), Point.Add(meteorCoordinates, new Size(beamEndPoint)));
+                var beamEndPoint = beamStartPoint + new Size((int) (-20 * Math.Cos(directionAngleRadians)), (int) (20 * Math.Sin(directionAngleRadians)));
+                g.DrawLine(new Pen(Colors.Yellow, 2), meteorCoordinates + beamStartPoint, meteorCoordinates + beamEndPoint);
             }
             
-            g.DrawArc(new Pen(Color.Blue, 2), meteorCoordinates.X - 10,
+            g.DrawArc(new Pen(Colors.Blue, 2), meteorCoordinates.X - 10,
                 meteorCoordinates.Y - 10, 20, 20, -directionAngle + 20, -40); // start and sweep angles counted clockwise
         }
 
@@ -177,21 +173,21 @@ namespace qwerty
 
         private void DrawShip(Ship ship, Point shipCoordinates)
         {
-            Graphics g = Graphics.FromImage(this.CurrentBitmap);
+            Graphics g = new Graphics(this.CurrentBitmap);
 
             SolidBrush generalBrush;
 
             if (ship.Owner == Player.FirstPlayer)
-                generalBrush = new SolidBrush(Color.Blue);
+                generalBrush = new SolidBrush(Colors.Blue);
             else if (ship.Owner == Player.SecondPlayer)
-                generalBrush = new SolidBrush(Color.Red);
+                generalBrush = new SolidBrush(Colors.Red);
             else
-                generalBrush = new SolidBrush(Color.Gray);
+                generalBrush = new SolidBrush(Colors.Gray);
 
-            var myPointArray = ship.PolygonPoints.Select(p => PointF.Add(p, new Size(shipCoordinates))).ToArray();
+            var myPointArray = ship.PolygonPoints.Select(p => p + shipCoordinates).ToArray();
             g.FillPolygon(generalBrush, myPointArray);
-            g.DrawString(ship.ActionsLeft.ToString(), new Font("Arial", 8.0F), Brushes.Blue, Point.Add(shipCoordinates, new Size(0, 15)));
-            g.DrawString(ship.CurrentHealth.ToString(), new Font("Arial", 8.0F), Brushes.Red, PointF.Add(shipCoordinates, new Size(0, -25)));
+            g.DrawText(new Font("Arial", 8.0F), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
+            g.DrawText(new Font("Arial", 8.0F), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
         }
 
         public void OnAnimationPending(object sender, AnimationEventArgs eventArgs)
@@ -211,7 +207,7 @@ namespace qwerty
             var currentCoordinates = movementStartPoint;
             for (int i = 0; i < 10; i++)
             {
-                currentCoordinates = PointF.Add(currentCoordinates, stepDifference);
+                currentCoordinates += stepDifference;
                 this.DrawField();
                 this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates));
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
@@ -227,7 +223,7 @@ namespace qwerty
             foreach (var overlaySprite in pendingAnimationOverlaySprites)
             {
                 this.DrawField();
-                Graphics g = Graphics.FromImage(this.CurrentBitmap);
+                Graphics g = new Graphics(this.CurrentBitmap);
                 g.DrawImage(overlaySprite, 0, 0);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 Thread.Sleep(50);

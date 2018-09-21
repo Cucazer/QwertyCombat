@@ -1,14 +1,14 @@
 ﻿﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using Eto.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using qwerty.Objects;
-using qwerty.Objects.Weapons;
+using QwertyCombat.Objects;
+using QwertyCombat.Objects.Weapons;
 using Hex = Barbar.HexGrid;
 
-namespace qwerty
+namespace QwertyCombat
 {
     class ObjectManager
     {

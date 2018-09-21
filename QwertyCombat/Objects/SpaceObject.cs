@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
+using Eto.Drawing;
 using Barbar.HexGrid;
 
-namespace qwerty.Objects
+namespace QwertyCombat.Objects
 {
     public enum ObjectType
     {

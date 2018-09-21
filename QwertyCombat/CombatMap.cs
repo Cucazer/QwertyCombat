@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using Eto.Drawing;
 using System.Linq;
-using qwerty.Objects;
+using QwertyCombat.Objects;
 using Hex = Barbar.HexGrid;
 
-namespace qwerty
+namespace QwertyCombat
 {
     /// <summary>
     /// Hexagon neighbor direction names as they are listed in "Directions" list of the cube coordinates in HexGrid library

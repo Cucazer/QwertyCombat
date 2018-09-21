@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using Eto.Drawing;
 using System.Threading;
 using Barbar.HexGrid;
-using qwerty.Objects;
-using Point = System.Drawing.Point;
+using QwertyCombat.Objects;
+using Point = Eto.Drawing.Point;
 
-namespace qwerty
+namespace QwertyCombat
 {
     class GameLogic
     {

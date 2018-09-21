@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Drawing;
-using qwerty.Objects.Weapons;
+using Eto.Drawing;
+using QwertyCombat.Objects.Weapons;
 
-namespace qwerty.Objects
+namespace QwertyCombat.Objects
 {
     public enum ShipType
     {

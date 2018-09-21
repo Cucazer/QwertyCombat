@@ -2,9 +2,9 @@
 using System.Drawing;
 using System.IO;
 using System.Media;
-using System.Windows.Forms;
+using Eto.Drawing;
 
-namespace qwerty.Objects.Weapons
+namespace QwertyCombat.Objects.Weapons
 {
     public enum WeaponType
     {

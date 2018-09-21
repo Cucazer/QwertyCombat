@@ -1,6 +1,6 @@
 ﻿using Hex = Barbar.HexGrid;
 
-namespace qwerty.Objects
+namespace QwertyCombat.Objects
 {
     // TODO: rename to meteoroid? meteor is already in atmosphere!
     class Meteor : SpaceObject

@@ -1,4 +1,4 @@
-﻿namespace qwerty.Objects
+﻿namespace QwertyCombat.Objects
 {
     public enum Player
     {

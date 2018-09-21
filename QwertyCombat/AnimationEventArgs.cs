@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using Eto.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using qwerty.Objects;
+using QwertyCombat.Objects;
 
-namespace qwerty
+namespace QwertyCombat
 {
     public enum AnimationType
     {
