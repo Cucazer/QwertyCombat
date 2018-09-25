@@ -54,7 +54,7 @@ namespace QwertyCombat
         public void DrawField()
         {
             Graphics g = new Graphics(this.CurrentBitmap);
-            g.FillRectangle(Brushes.Black, 0, 0, this.CurrentBitmap.Width, this.CurrentBitmap.Height);
+            g.Clear(Colors.Black);
 
             foreach (var hexagonCorners in this.combatMap.AllHexagonCorners)
             {
