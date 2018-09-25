@@ -4,9 +4,9 @@ using Eto.Drawing;
 
 namespace QwertyCombat
 {
-	public class MainForm : Form
-	{
-        public Drawable pictureMap;
+    public class MainForm : Form
+    {
+        public ImageView pictureMap;
 
         private Label labelObjectDescription;
         private Button buttonEndTurn;
@@ -17,26 +17,55 @@ namespace QwertyCombat
         private Button buttonDebug;
         private CheckBox checkBoxAudio;
 
+        private ObjectManager objectManager => this.gameLogic.objectManager;
+        private readonly GameLogic gameLogic = new GameLogic(8, 6);
+        private readonly FieldPainter fieldPainter;
+        //private readonly SoundPlayer soundPlayer = new SoundPlayer();
+
         public MainForm()
-		{
+        {
             Title = "QWERTY Combat";
             ClientSize = new Size(400, 350);
             MinimumSize = new Size(400, 350);
 
-            this.pictureMap = new Drawable { Height = 300, Width = 400, BackgroundColor = Colors.LightBlue };
+            // Controls initialization
+
+            this.pictureMap = new ImageView { Height = 300, Width = 400, BackgroundColor = Colors.LightBlue };
             this.pictureMap.MouseUp += (sender, e) => { MessageBox.Show($"{e.Location}"); };
 
+            this.labelObjectDescription = new Label();
+
+            this.buttonEndTurn = new Button { Text = "End turn" };
+            this.buttonEndTurn.Click += this.btnEndTurn_Click;
+
             this.labelPlayerTurn = new Label { Text = "First player's turn" };
+
+            this.labelShipsAlive = new Label { Text = "Ships alive:" };
+
+            this.labelBlueShipsAlive = new Label { TextColor = Colors.Blue };
+
+            this.labelRedShipsAlive = new Label { TextColor = Colors.Red };
+
+            this.buttonDebug = new Button { Text = "DEBUG" };
+            this.buttonDebug.Click += this.buttonDebug_Click;
+#if !DEBUG
+            this.buttonDebug.Visible = false;
+#endif
+
+            this.checkBoxAudio = new CheckBox { Checked = true, Text = "Audio" };
+
+            // Layouting
 
             var controlsLayout = new TableLayout
             {
                 Rows =
                 {
-                    new Button { Text = "DEBUG", Visible = false},
-                    new Label { Text = "Description" },
+                    this.buttonDebug,
+                    this.labelObjectDescription,
                     this.labelPlayerTurn,
-                    new Label { Text = "Ships alive:" },
-                    new CheckBox { Text = "Audio" },
+                    this.labelShipsAlive,
+                    new TableRow(this.labelBlueShipsAlive, this.labelRedShipsAlive),
+                    this.checkBoxAudio,
                     null
                 },
                 Spacing = new Size(10, 10),
@@ -44,14 +73,94 @@ namespace QwertyCombat
                 Width = 200
             };
 
-            var endTurnBtn = new Button { Text = "End turn" };
-            endTurnBtn.Click += (sender, e) => this.labelPlayerTurn.Text = this.labelPlayerTurn.Text.Contains("First") ? "Second player's turn" : "First player's turn";
 
-            var fieldLayout = new TableLayout { Rows = { TableLayout.AutoSized(this.pictureMap, centered: true), TableLayout.AutoSized(endTurnBtn, centered: true), null }, Spacing = new Size(10, 10) };
+            var fieldLayout = new TableLayout
+            {
+                Rows =
+                {
+                    TableLayout.AutoSized(this.pictureMap, centered: true),
+                    TableLayout.AutoSized(this.buttonEndTurn, centered: true),
+                    null
+                },
+                Spacing = new Size(10, 10)
+            };
 
             var layout = new TableLayout(new TableRow(controlsLayout, fieldLayout));
 
             Content = layout;
+
+            // constructor code from previous solution
+
+            this.pictureMap.Width = this.gameLogic.BitmapWidth;
+            this.pictureMap.Height = this.gameLogic.BitmapHeight;
+            // i'll leave this as constants -> calculation from window size or placing in container later
+            //this.Width = this.pictureMap.Right + 25;
+            //this.Height = this.pictureMap.Bottom + 45;
+            this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
+            //ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
+            //ObjectManager.SoundPlayed += this.OnSoundEffect;
+            this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
+            this.fieldPainter.DrawField();
+            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
+            this.fieldPainter.CurrentBitmap.Save("field.png", ImageFormat.Png);
+            //this.pictureMap.Refresh();
+            this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
+            this.UpdateShipCount();
         }
-	}
+
+        public void UpdateShipCount()
+        {
+            int blueShipsCount = this.gameLogic.FirstPlayerShipCount;
+            int redShipsCount = this.gameLogic.SecondPlayerShipCount;
+
+            if (blueShipsCount == 0 || redShipsCount == 0)
+            {
+                this.labelBlueShipsAlive.Text = "";
+                this.labelRedShipsAlive.Text = "";
+                this.labelObjectDescription.Text = "GAME OVER!";
+                return;
+            }
+            this.labelBlueShipsAlive.Text = $"{blueShipsCount}";
+            this.labelRedShipsAlive.Text = $"{redShipsCount}";
+        }
+
+        private void pictureMap_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.gameLogic.HandleFieldClick((Point)e.Location);
+            this.fieldPainter.UpdateBitmap();
+            //this.pictureMap.Refresh();
+            //this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
+            this.UpdateShipCount();
+        }
+
+        private void btnEndTurn_Click(object sender, EventArgs e)
+        {
+            this.gameLogic.EndTurn();
+            this.fieldPainter.UpdateBitmap();
+            //this.pictureMap.Refresh();
+            this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
+            this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
+            this.UpdateShipCount();
+        }
+
+        private void buttonDebug_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Hello from debug!");
+        }
+
+        private void OnBitmapUpdated(object sender, EventArgs e)
+        {
+            this.pictureMap.Invalidate();
+        }
+
+        //private void OnSoundEffect(object sender, SoundEventArgs e)
+        //{
+        //    if (!this.checkBoxAudio.Checked)
+        //    {
+        //        return;
+        //    }
+        //    this.soundPlayer.Stream = e.AudioStream;
+        //    this.soundPlayer.Play();
+        //}
+    }
 }
