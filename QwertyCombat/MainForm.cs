@@ -31,7 +31,7 @@ namespace QwertyCombat
             // Controls initialization
 
             this.pictureMap = new ImageView { Height = 300, Width = 400, BackgroundColor = Colors.LightBlue };
-            this.pictureMap.MouseUp += (sender, e) => { MessageBox.Show($"{e.Location}"); };
+            this.pictureMap.MouseUp += this.pictureMap_MouseClick;
 
             this.labelObjectDescription = new Label();
 
@@ -94,15 +94,14 @@ namespace QwertyCombat
             this.pictureMap.Width = this.gameLogic.BitmapWidth;
             this.pictureMap.Height = this.gameLogic.BitmapHeight;
             // i'll leave this as constants -> calculation from window size or placing in container later
-            //this.Width = this.pictureMap.Right + 25;
-            //this.Height = this.pictureMap.Bottom + 45;
+            this.Width = this.pictureMap.Bounds.Right + 250;
+            this.Height = this.pictureMap.Bounds.Bottom + 100;
             this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
             //ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             //ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
             this.fieldPainter.DrawField();
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
-            this.fieldPainter.CurrentBitmap.Save("field.png", ImageFormat.Png);
             //this.pictureMap.Refresh();
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
@@ -128,8 +127,9 @@ namespace QwertyCombat
         {
             this.gameLogic.HandleFieldClick((Point)e.Location);
             this.fieldPainter.UpdateBitmap();
-            //this.pictureMap.Refresh();
-            //this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
+            // unfortunately there is no Refresh method in Eto.Forms and Invalidate doesn't work as intended, but reassigning image to updated bitmap does the trick :)
+            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
+            this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
             this.UpdateShipCount();
         }
 
@@ -137,7 +137,7 @@ namespace QwertyCombat
         {
             this.gameLogic.EndTurn();
             this.fieldPainter.UpdateBitmap();
-            //this.pictureMap.Refresh();
+            this.pictureMap.Invalidate();
             this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
