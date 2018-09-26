@@ -6,7 +6,6 @@ using Barbar.HexGrid;
 using QwertyCombat.Objects;
 using Point = Eto.Drawing.Point;
 using System.Threading;
-using QwertyCombat.Objects.Weapons;
 
 namespace QwertyCombat
 {
@@ -146,7 +145,7 @@ namespace QwertyCombat
             {
                 g.FillEllipse(Brushes.Gray,
                     new Rectangle(meteorCoordinates - meteorRadius, new Size(2 * meteorRadius, 2 * meteorRadius)));
-                g.DrawText(new Font("Arial", 8.0F), Brushes.Red, meteorCoordinates + new Size(5, -25), meteor.CurrentHealth.ToString());
+                g.DrawText(Fonts.Sans(8), Brushes.Red, meteorCoordinates + new Size(5, -25), meteor.CurrentHealth.ToString());
                 // TODO: better indicate meteor's way
                 var directionAngle = 60 * (int)meteor.MovementDirection - 30;
                 var directionAngleRadians = (float)directionAngle / 180 * Math.PI;
@@ -193,8 +192,8 @@ namespace QwertyCombat
 
                 var myPointArray = ship.PolygonPoints.Select(p => p + shipCoordinates).ToArray();
                 g.FillPolygon(generalBrush, myPointArray);
-                g.DrawText(new Font("Arial", 8.0F), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
-                g.DrawText(new Font("Arial", 8.0F), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
+                g.DrawText(Fonts.Sans(8), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
+                g.DrawText(Fonts.Sans(8), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
             }
         }
 
