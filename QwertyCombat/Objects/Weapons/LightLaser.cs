@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Media;
 using Eto.Drawing;
 
 namespace QwertyCombat.Objects.Weapons
