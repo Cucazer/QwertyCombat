@@ -1,11 +1,11 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
+using Eto.Forms;
 using Eto.Drawing;
 using System.Linq;
 using Barbar.HexGrid;
 using QwertyCombat.Objects;
 using Point = Eto.Drawing.Point;
-using System.Threading;
 
 namespace QwertyCombat
 {
@@ -16,6 +16,9 @@ namespace QwertyCombat
         private ObjectManager objectManager;
 
         private CombatMap combatMap => this.objectManager.CombatMap;
+
+        //private UITimer animationTimer = new UITimer();
+        private Queue<AnimationEventArgs> AnimationQueue = new Queue<AnimationEventArgs>();
 
         public event EventHandler BitmapUpdated;
 
@@ -39,11 +42,42 @@ namespace QwertyCombat
                     this.AnimateAttack(animationToPerform.SpaceObject, animationToPerform.OverlaySprites);
                     break;
                 case AnimationType.Rotation:
-                    this.AnimateRotation(animationToPerform.SpaceObject, animationToPerform.RotationAngle);
+                    this.AnimateRotation(animationToPerform.SpaceObjectInitialState, animationToPerform.SpaceObject, animationToPerform.RotationAngle);
                     break;
                 case AnimationType.Movement:
                     this.AnimateMovingObjects(animationToPerform.SpaceObject, animationToPerform.MovementStart,
                         animationToPerform.MovementDestination);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private bool performingAnimation = false;
+        public void HandleAnimationQueue(AnimationEventArgs animationToPerform = null)
+        {
+            if (animationToPerform != null)
+            {
+                AnimationQueue.Enqueue(animationToPerform);
+            }
+
+            if (!AnimationQueue.Any() || performingAnimation)
+            {
+                return;
+            }
+
+            var nextAnimation = AnimationQueue.Dequeue();
+            switch (nextAnimation.AnimationType)
+            {
+                case AnimationType.Sprites:
+                    this.AnimateAttack(nextAnimation.SpaceObject, nextAnimation.OverlaySprites);
+                    break;
+                case AnimationType.Rotation:
+                    this.AnimateRotation(nextAnimation.SpaceObjectInitialState, nextAnimation.SpaceObject, nextAnimation.RotationAngle);
+                    break;
+                case AnimationType.Movement:
+                    this.AnimateMovingObjects(nextAnimation.SpaceObject, nextAnimation.MovementStart,
+                        nextAnimation.MovementDestination);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -199,10 +233,16 @@ namespace QwertyCombat
 
         public void OnAnimationPending(object sender, AnimationEventArgs eventArgs)
         {
-            this.UpdateBitmap(eventArgs);
+            this.HandleAnimationQueue(eventArgs);
         }
 
-        private void AnimateMovingObjects(SpaceObject spaceObject,PointF movementStartPoint, PointF movementDestinationPoint)
+        //private async Task<bool> WaitForAnimationToComplete()
+        //{
+        //    while (animationTimer.Started) { }
+        //    return true;
+        //}
+
+        private async void AnimateMovingObjects(SpaceObject spaceObject,PointF movementStartPoint, PointF movementDestinationPoint)
         {
             // disabling ability to move multiple objects at once, because it kinda hurts turn-based principle, where each object moves on it's own turn
             if (spaceObject == null)
@@ -210,63 +250,100 @@ namespace QwertyCombat
                 return;
             }
             spaceObject.IsMoving = true;
+            performingAnimation = true;
             var stepDifference = new SizeF((movementDestinationPoint.X - movementStartPoint.X) / 10, (movementDestinationPoint.Y - movementStartPoint.Y) / 10);
             var currentCoordinates = movementStartPoint;
-            for (int i = 0; i < 10; i++)
+            //var animationCompleted = await WaitForAnimationToComplete();
+            var animationTimer = new UITimer { Interval = 0.01 };
+            var steps = 0;
+            animationTimer.Elapsed += (sender, eventArgs) =>
             {
                 currentCoordinates += stepDifference;
                 this.DrawField();
                 this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates));
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
-                Thread.Sleep(30);
-            }
+                if (++steps >= 10)
+                {
+                    animationTimer.Stop();
+                    performingAnimation = false;
+                    spaceObject.IsMoving = false;
+                    this.DrawField();
+                    this.HandleAnimationQueue();
+                }
+            };
+            animationTimer.Start();
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    currentCoordinates += stepDifference;
+            //    this.DrawField();
+            //    this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates));
+            //    this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
+            //    Thread.Sleep(30);
+            //}
 
-            spaceObject.IsMoving = false;
-            this.DrawField();
         }
         
         private void AnimateAttack(SpaceObject pendingAnimationSpaceObject, List<Bitmap> pendingAnimationOverlaySprites)
         {
-            foreach (var overlaySprite in pendingAnimationOverlaySprites)
-            {
+            performingAnimation = true;
+            var animationTimer = new UITimer { Interval = 0.01 };
+            var overlaySpriteIndex = 0;
+            animationTimer.Elapsed += delegate {
                 this.DrawField();
                 using (var g = new Graphics(this.CurrentBitmap))
                 {
-                    g.DrawImage(overlaySprite, 0, 0);
+                    g.DrawImage(pendingAnimationOverlaySprites[overlaySpriteIndex], 0, 0);
                 }
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
-                Thread.Sleep(50);
-            }
-            // animation fully drawn - redraw initial field
-            this.DrawField();
+
+                if (++overlaySpriteIndex >= pendingAnimationOverlaySprites.Count)
+                {
+                    animationTimer.Stop();
+                    // animation fully drawn - redraw initial field
+                    this.DrawField();
+                    performingAnimation = false;
+                    HandleAnimationQueue();
+                }
+            };
+            animationTimer.Start();
         }
 
-        private void AnimateRotation(SpaceObject spaceObject, double angle)
+        private async void AnimateRotation(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, double angle)
         {
+            var totalStepCount = 7;
             spaceObject.IsMoving = true;
+            performingAnimation = true;
             angle = angle * Math.PI / 180;
-            var dAngle = angle / 10;
-            
-            var initialPolygonPoints = spaceObject.PolygonPoints.ToList();
-            
-            for (int i = 0; i < 10; i++)
+            var dAngle = angle / totalStepCount;
+
+            //var initialPolygonPoints = spaceObject.PolygonPoints.ToList();
+            var spaceObjectToAnimate = spaceObjectInitialState;
+
+            //var animationCompleted = await WaitForAnimationToComplete();
+            var animationTimer = new UITimer { Interval = 0.01 };
+            var steps = 0;
+            animationTimer.Elapsed += (sender, eventArgs) =>
             {
-                for (int j = 0; j < spaceObject.PolygonPoints.Count; j++)
+                for (int j = 0; j < spaceObjectToAnimate.PolygonPoints.Count; j++)
                 {
-                    spaceObject.PolygonPoints[j] =
-                        new PointF((float) (spaceObject.PolygonPoints[j].X * Math.Cos(dAngle) - spaceObject.PolygonPoints[j].Y * Math.Sin(dAngle)),
-                            (float) (spaceObject.PolygonPoints[j].X * Math.Sin(dAngle) + spaceObject.PolygonPoints[j].Y * Math.Cos(dAngle)));
+                    spaceObjectToAnimate.PolygonPoints[j] =
+                        new PointF((float)(spaceObjectToAnimate.PolygonPoints[j].X * Math.Cos(dAngle) - spaceObjectToAnimate.PolygonPoints[j].Y * Math.Sin(dAngle)),
+                            (float)(spaceObjectToAnimate.PolygonPoints[j].X * Math.Sin(dAngle) + spaceObjectToAnimate.PolygonPoints[j].Y * Math.Cos(dAngle)));
                 }
                 this.DrawField();
-                this.DrawSpaceObject(spaceObject);
+                this.DrawSpaceObject(spaceObjectToAnimate);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
-                Thread.Sleep(20);
-                
-            }
-
-            spaceObject.PolygonPoints = initialPolygonPoints;
-            spaceObject.IsMoving = false;
-            this.DrawField();
+                if (++steps >= totalStepCount)
+                {
+                    animationTimer.Stop();
+                    performingAnimation = false;
+                    //spaceObject.PolygonPoints = initialPolygonPoints;
+                    spaceObject.IsMoving = false;
+                    this.DrawField();
+                    this.HandleAnimationQueue();
+                }
+            };
+            animationTimer.Start();
         }
     }
 }

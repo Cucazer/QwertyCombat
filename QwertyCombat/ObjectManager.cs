@@ -179,7 +179,7 @@ namespace QwertyCombat
             {
                 SoundPlayed?.Invoke(this, new SoundEventArgs(Properties.Resources.spaceShipFly));
             }
-            ObjectAnimated?.Invoke(this, new AnimationEventArgs(spaceObject, this.CombatMap.HexToPixel(spaceObject.ObjectCoordinates), this.CombatMap.HexToPixel(destination)));
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs((SpaceObject)spaceObject.Clone(), spaceObject, this.CombatMap.HexToPixel(spaceObject.ObjectCoordinates), this.CombatMap.HexToPixel(destination)));
             if (destination.Column < 0 || destination.Column >= this.MapWidth ||
                 destination.Row < 0 || destination.Row >= this.MapHeight)
             {
@@ -207,7 +207,7 @@ namespace QwertyCombat
                     this.CombatMap.HexToPixel(attackerShip.ObjectCoordinates),
                     this.CombatMap.HexToPixel(victim.ObjectCoordinates));
                 SoundPlayed?.Invoke(this, new SoundEventArgs(attackerShip.EquippedWeapon.AttackSound));
-                ObjectAnimated?.Invoke(this, new AnimationEventArgs(attacker, attackSprites));
+                ObjectAnimated?.Invoke(this, new AnimationEventArgs((SpaceObject)attacker.Clone(), attacker, attackSprites));
                 this.DealDamage(victim, attackerShip.AttackDamage);
                 attackerShip.ActionsLeft -= attackerShip.EquippedWeapon.EnergyСonsumption;
             }
@@ -224,7 +224,7 @@ namespace QwertyCombat
 
         public void RotateObject(SpaceObject spaceObject, double angle)
         {
-            ObjectAnimated?.Invoke(this, new AnimationEventArgs(spaceObject, angle));
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs((SpaceObject)spaceObject.Clone(), spaceObject, angle));
             spaceObject.Rotate(angle);
         }
 

@@ -97,12 +97,11 @@ namespace QwertyCombat
             this.Width = this.pictureMap.Bounds.Right + 250;
             this.Height = this.pictureMap.Bounds.Bottom + 100;
             this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
-            //ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
+            ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             //ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
             this.fieldPainter.DrawField();
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
-            //this.pictureMap.Refresh();
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
         }
@@ -126,7 +125,7 @@ namespace QwertyCombat
         private void pictureMap_MouseClick(object sender, MouseEventArgs e)
         {
             this.gameLogic.HandleFieldClick((Point)e.Location);
-            this.fieldPainter.UpdateBitmap();
+            this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
             // unfortunately there is no Refresh method in Eto.Forms and Invalidate doesn't work as intended, but reassigning image to updated bitmap does the trick :)
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
             this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
@@ -136,8 +135,8 @@ namespace QwertyCombat
         private void btnEndTurn_Click(object sender, EventArgs e)
         {
             this.gameLogic.EndTurn();
-            this.fieldPainter.UpdateBitmap();
-            this.pictureMap.Invalidate();
+            this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
+            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
             this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
@@ -148,9 +147,16 @@ namespace QwertyCombat
             MessageBox.Show("Hello from debug!");
         }
 
+        int step = 0;
         private void OnBitmapUpdated(object sender, EventArgs e)
         {
+            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
             this.pictureMap.Invalidate();
+            this.labelObjectDescription.Text = $"{step++}";
+            this.labelObjectDescription.Invalidate();
+            this.Invalidate();
+            //var bit = (Bitmap)this.pictureMap.Image;
+            //bit.Save($"step{step++}.jpg", ImageFormat.Jpeg);
         }
 
         //private void OnSoundEffect(object sender, SoundEventArgs e)

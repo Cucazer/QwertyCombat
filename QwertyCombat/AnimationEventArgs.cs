@@ -17,6 +17,7 @@ namespace QwertyCombat
     
     class AnimationEventArgs: EventArgs
     {
+        public SpaceObject SpaceObjectInitialState { get; }
         public SpaceObject SpaceObject { get; }
         public Point MovementStart { get; }
         public List<Bitmap> OverlaySprites { get; }
@@ -24,24 +25,27 @@ namespace QwertyCombat
         public Point MovementDestination { get; }
         public AnimationType AnimationType { get; }
 
-        public AnimationEventArgs(SpaceObject spaceObject, Point movementStart, Point movementDestination)
+        public AnimationEventArgs(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, Point movementStart, Point movementDestination)
         {
             this.AnimationType = AnimationType.Movement;
+            this.SpaceObjectInitialState = spaceObjectInitialState;
             this.SpaceObject = spaceObject;
             this.MovementStart = movementStart;
             this.MovementDestination = movementDestination;
         }
 
-        public AnimationEventArgs(SpaceObject spaceObject, double rotationAngle)
+        public AnimationEventArgs(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, double rotationAngle)
         {
             this.AnimationType = AnimationType.Rotation;
+            this.SpaceObjectInitialState = spaceObjectInitialState;
             this.SpaceObject = spaceObject;
             this.RotationAngle = rotationAngle;
         }
 
-        public AnimationEventArgs(SpaceObject spaceObject, List<Bitmap> overlaySprites)
+        public AnimationEventArgs(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, List<Bitmap> overlaySprites)
         {
             this.AnimationType = AnimationType.Sprites;
+            this.SpaceObjectInitialState = spaceObjectInitialState;
             this.SpaceObject = spaceObject;
             this.OverlaySprites = overlaySprites;
         }
