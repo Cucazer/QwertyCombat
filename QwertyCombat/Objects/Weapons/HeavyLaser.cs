@@ -28,8 +28,10 @@ namespace QwertyCombat.Objects.Weapons
             for (int i = -2; i < 2; i++)
             {
                 var sprite = new Bitmap((int) Math.Max(sourcePoint.X, targetPoint.X) + 2, (int) Math.Max(sourcePoint.Y, targetPoint.Y), PixelFormat.Format32bppRgba);
-                var g = new Graphics(sprite);
-                g.DrawLine(laserPen1, sourcePoint, targetPoint + new Size(i,0));
+                using (var g = new Graphics(sprite))
+                {
+                    g.DrawLine(laserPen1, sourcePoint, targetPoint + new Size(i, 0));
+                }
 
                 sprites.Add(sprite);
             }
