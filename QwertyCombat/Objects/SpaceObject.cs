@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Eto.Drawing;
 using Barbar.HexGrid;
 
@@ -10,7 +11,7 @@ namespace QwertyCombat.Objects
         Meteor
     }
 
-    public abstract class SpaceObject
+    public abstract class SpaceObject: ICloneable
     {
         public readonly int MaxActions;
 
@@ -38,6 +39,11 @@ namespace QwertyCombat.Objects
         public OffsetCoordinates ObjectCoordinates { get; set; }
         public abstract string Description { get; }
         public bool IsMoving { get; set; }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
 
         public abstract void Rotate(double angle);
     }
