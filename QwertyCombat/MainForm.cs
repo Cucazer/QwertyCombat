@@ -30,8 +30,8 @@ namespace QwertyCombat
 
             // Controls initialization
 
-            this.pictureMap = new ImageView { Height = 300, Width = 400, BackgroundColor = Colors.LightBlue };
-            this.pictureMap.MouseUp += this.pictureMap_MouseClick;
+            this.pictureMap = new ImageView { BackgroundColor = Colors.LightBlue };
+            this.pictureMap.MouseDown += this.pictureMap_MouseClick;
 
             this.labelObjectDescription = new Label();
 
@@ -91,19 +91,22 @@ namespace QwertyCombat
 
             // constructor code from previous solution
 
-            this.pictureMap.Width = this.gameLogic.BitmapWidth;
-            this.pictureMap.Height = this.gameLogic.BitmapHeight;
+            //this.pictureMap.Width = this.gameLogic.BitmapWidth;
+            //this.pictureMap.Height = this.gameLogic.BitmapHeight;
             // i'll leave this as constants -> calculation from window size or placing in container later
-            this.Width = this.pictureMap.Bounds.Right + 250;
-            this.Height = this.pictureMap.Bounds.Bottom + 100;
+            
             this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
             ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             //ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
             this.fieldPainter.DrawField();
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
+            this.fieldPainter.CurrentBitmap.Save("out.jpg", ImageFormat.Jpeg);
+            this.Width = this.pictureMap.Bounds.Right + 250;
+            this.Height = this.pictureMap.Bounds.Bottom + 100;
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
+            this.Shown += (sender, e) => { this.ClientSize = fieldLayout.ClientSize; /*works with static size definition though...*/ };
         }
 
         public void UpdateShipCount()
@@ -134,6 +137,9 @@ namespace QwertyCombat
 
         private void btnEndTurn_Click(object sender, EventArgs e)
         {
+            MessageBox.Show($"{this.pictureMap.Bounds.Right} x {this.pictureMap.Bounds.Bottom}");
+            this.ClientSize = new Size(1000,1000);
+
             this.gameLogic.EndTurn();
             this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;

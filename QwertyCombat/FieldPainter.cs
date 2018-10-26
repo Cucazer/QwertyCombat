@@ -254,7 +254,7 @@ namespace QwertyCombat
             var stepDifference = new SizeF((movementDestinationPoint.X - movementStartPoint.X) / 10, (movementDestinationPoint.Y - movementStartPoint.Y) / 10);
             var currentCoordinates = movementStartPoint;
             //var animationCompleted = await WaitForAnimationToComplete();
-            var animationTimer = new UITimer { Interval = 0.01 };
+            var animationTimer = new UITimer { Interval = 0.1 };
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
@@ -286,7 +286,7 @@ namespace QwertyCombat
         private void AnimateAttack(SpaceObject pendingAnimationSpaceObject, List<Bitmap> pendingAnimationOverlaySprites)
         {
             performingAnimation = true;
-            var animationTimer = new UITimer { Interval = 0.01 };
+            var animationTimer = new UITimer { Interval = 0.1 };
             var overlaySpriteIndex = 0;
             animationTimer.Elapsed += delegate {
                 this.DrawField();
@@ -320,7 +320,7 @@ namespace QwertyCombat
             var spaceObjectToAnimate = spaceObjectInitialState;
 
             //var animationCompleted = await WaitForAnimationToComplete();
-            var animationTimer = new UITimer { Interval = 0.01 };
+            var animationTimer = new UITimer { Interval = 0.1 };
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
