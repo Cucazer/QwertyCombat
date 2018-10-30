@@ -17,6 +17,10 @@ namespace QwertyCombat
         private Button buttonDebug;
         private CheckBox checkBoxAudio;
 
+        private TableLayout controlsLayout;
+        private TableLayout fieldLayout;
+        private TableLayout formLayout;
+
         private ObjectManager objectManager => this.gameLogic.objectManager;
         private readonly GameLogic gameLogic = new GameLogic(8, 6);
         private readonly FieldPainter fieldPainter;
@@ -56,7 +60,7 @@ namespace QwertyCombat
 
             // Layouting
 
-            var controlsLayout = new TableLayout
+            this.controlsLayout = new TableLayout
             {
                 Rows =
                 {
@@ -74,7 +78,7 @@ namespace QwertyCombat
             };
 
 
-            var fieldLayout = new TableLayout
+            this.fieldLayout = new TableLayout
             {
                 Rows =
                 {
@@ -85,28 +89,25 @@ namespace QwertyCombat
                 Spacing = new Size(10, 10)
             };
 
-            var layout = new TableLayout(new TableRow(controlsLayout, fieldLayout));
+            this.formLayout = new TableLayout(new TableRow(controlsLayout, fieldLayout));
 
-            Content = layout;
+            Content = this.formLayout;
 
-            // constructor code from previous solution
-
-            //this.pictureMap.Width = this.gameLogic.BitmapWidth;
-            //this.pictureMap.Height = this.gameLogic.BitmapHeight;
-            // i'll leave this as constants -> calculation from window size or placing in container later
-            
+            // constructor code from previous solution            
             this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
             ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             //ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
             this.fieldPainter.DrawField();
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
-            this.fieldPainter.CurrentBitmap.Save("out.jpg", ImageFormat.Jpeg);
-            this.Width = this.pictureMap.Bounds.Right + 250;
-            this.Height = this.pictureMap.Bounds.Bottom + 100;
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
-            this.Shown += (sender, e) => { this.ClientSize = fieldLayout.ClientSize; /*works with static size definition though...*/ };
+            this.Shown += (sender, e) => {
+                //this.fieldLayout.Update();
+                //this.formLayout.Update();
+                //this.ClientSize = this.formLayout.ClientSize;
+                this.ClientSize = new Size(this.pictureMap.Bounds.Right + 250, this.pictureMap.Bounds.Bottom + 100);
+            };
         }
 
         public void UpdateShipCount()
@@ -138,7 +139,7 @@ namespace QwertyCombat
         private void btnEndTurn_Click(object sender, EventArgs e)
         {
             MessageBox.Show($"{this.pictureMap.Bounds.Right} x {this.pictureMap.Bounds.Bottom}");
-            this.ClientSize = new Size(1000,1000);
+            this.Width = 1000;
 
             this.gameLogic.EndTurn();
             this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
