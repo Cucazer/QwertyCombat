@@ -17,7 +17,7 @@ namespace QwertyCombat
     
     class AnimationEventArgs: EventArgs
     {
-        public SpaceObject SpaceObjectInitialState { get; }
+        public GameState CurrentGameState { get; }
         public SpaceObject SpaceObject { get; }
         public Point MovementStart { get; }
         public List<Bitmap> OverlaySprites { get; }
@@ -25,27 +25,27 @@ namespace QwertyCombat
         public Point MovementDestination { get; }
         public AnimationType AnimationType { get; }
 
-        public AnimationEventArgs(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, Point movementStart, Point movementDestination)
+        public AnimationEventArgs(GameState currentGameState, SpaceObject spaceObject, Point movementStart, Point movementDestination)
         {
             this.AnimationType = AnimationType.Movement;
-            this.SpaceObjectInitialState = spaceObjectInitialState;
+            this.CurrentGameState = currentGameState;
             this.SpaceObject = spaceObject;
             this.MovementStart = movementStart;
             this.MovementDestination = movementDestination;
         }
 
-        public AnimationEventArgs(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, double rotationAngle)
+        public AnimationEventArgs(GameState currentGameState, SpaceObject spaceObject, double rotationAngle)
         {
             this.AnimationType = AnimationType.Rotation;
-            this.SpaceObjectInitialState = spaceObjectInitialState;
+            this.CurrentGameState = currentGameState;
             this.SpaceObject = spaceObject;
             this.RotationAngle = rotationAngle;
         }
 
-        public AnimationEventArgs(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, List<Bitmap> overlaySprites)
+        public AnimationEventArgs(GameState currentGameState, SpaceObject spaceObject, List<Bitmap> overlaySprites)
         {
             this.AnimationType = AnimationType.Sprites;
-            this.SpaceObjectInitialState = spaceObjectInitialState;
+            this.CurrentGameState = currentGameState;
             this.SpaceObject = spaceObject;
             this.OverlaySprites = overlaySprites;
         }

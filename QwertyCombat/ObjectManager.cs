@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using Eto.Drawing;
 using System.Linq;
-using System.Text;
+ using System.Runtime.CompilerServices;
+ using System.Text;
 using System.Threading.Tasks;
 using QwertyCombat.Objects;
 using QwertyCombat.Objects.Weapons;
@@ -14,12 +15,12 @@ namespace QwertyCombat
     {
         public int MapWidth { get; }
         public int MapHeight { get; }
-        public List<Meteor> Meteors => this.SpaceObjects.OfType<Meteor>().ToList();
-        public List<Ship> Ships => this.SpaceObjects.OfType<Ship>().ToList();
         public const int MeteorAppearanceChance = 20;
 
         public CombatMap CombatMap;
-        public SpaceObject[] SpaceObjects;
+        public SpaceObject[] SpaceObjects => this.GameState.SpaceObjects;
+        public List<Meteor> Meteors => this.GameState.Meteors;
+        public List<Ship> Ships => this.GameState.Ships;
 
         public static event EventHandler<AnimationEventArgs> ObjectAnimated;
         public static event EventHandler<SoundEventArgs> SoundPlayed;
@@ -30,12 +31,14 @@ namespace QwertyCombat
         public int BitmapHeight => this.CombatMap.BitmapHeight;
         public Ship ActiveShip { get; set; }
 
+        public GameState GameState;
+
         public ObjectManager(int mapWidth, int mapHeight)
         {
             this.MapWidth = mapWidth;
             this.MapHeight = mapHeight;
             this.CombatMap = new CombatMap(mapWidth, mapHeight);
-            this.SpaceObjects = new SpaceObject[mapWidth * mapHeight];
+            this.GameState = new GameState(mapWidth * mapHeight);
 
             this.CreateShip(ShipType.Scout, WeaponType.LightIon, Player.FirstPlayer);
             this.CreateShip(ShipType.Scout, WeaponType.LightIon, Player.FirstPlayer);
@@ -179,7 +182,7 @@ namespace QwertyCombat
             {
                 SoundPlayed?.Invoke(this, new SoundEventArgs(Properties.Resources.spaceShipFly));
             }
-            ObjectAnimated?.Invoke(this, new AnimationEventArgs((SpaceObject)spaceObject.Clone(), spaceObject, this.CombatMap.HexToPixel(spaceObject.ObjectCoordinates), this.CombatMap.HexToPixel(destination)));
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs((GameState)this.GameState.Clone(), spaceObject, this.CombatMap.HexToPixel(spaceObject.ObjectCoordinates), this.CombatMap.HexToPixel(destination)));
             if (destination.Column < 0 || destination.Column >= this.MapWidth ||
                 destination.Row < 0 || destination.Row >= this.MapHeight)
             {
@@ -207,7 +210,7 @@ namespace QwertyCombat
                     this.CombatMap.HexToPixel(attackerShip.ObjectCoordinates),
                     this.CombatMap.HexToPixel(victim.ObjectCoordinates));
                 SoundPlayed?.Invoke(this, new SoundEventArgs(attackerShip.EquippedWeapon.AttackSound));
-                ObjectAnimated?.Invoke(this, new AnimationEventArgs((SpaceObject)attacker.Clone(), attacker, attackSprites));
+                ObjectAnimated?.Invoke(this, new AnimationEventArgs((GameState)this.GameState.Clone(), attacker, attackSprites));
                 this.DealDamage(victim, attackerShip.AttackDamage);
                 attackerShip.ActionsLeft -= attackerShip.EquippedWeapon.EnergyСonsumption;
             }
@@ -224,7 +227,7 @@ namespace QwertyCombat
 
         public void RotateObject(SpaceObject spaceObject, double angle)
         {
-            ObjectAnimated?.Invoke(this, new AnimationEventArgs((SpaceObject)spaceObject.Clone(), spaceObject, angle));
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs((GameState)this.GameState.Clone(), spaceObject, angle));
             spaceObject.Rotate(angle);
         }
 

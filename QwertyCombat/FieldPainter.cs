@@ -42,7 +42,8 @@ namespace QwertyCombat
                     this.AnimateAttack(animationToPerform.SpaceObject, animationToPerform.OverlaySprites);
                     break;
                 case AnimationType.Rotation:
-                    this.AnimateRotation(animationToPerform.SpaceObjectInitialState, animationToPerform.SpaceObject, animationToPerform.RotationAngle);
+                    // maybe save game state
+                    this.AnimateRotation(animationToPerform.CurrentGameState, animationToPerform.SpaceObject, animationToPerform.RotationAngle);
                     break;
                 case AnimationType.Movement:
                     this.AnimateMovingObjects(animationToPerform.SpaceObject, animationToPerform.MovementStart,
@@ -73,7 +74,7 @@ namespace QwertyCombat
                     this.AnimateAttack(nextAnimation.SpaceObject, nextAnimation.OverlaySprites);
                     break;
                 case AnimationType.Rotation:
-                    this.AnimateRotation(nextAnimation.SpaceObjectInitialState, nextAnimation.SpaceObject, nextAnimation.RotationAngle);
+                    this.AnimateRotation(nextAnimation.CurrentGameState, nextAnimation.SpaceObject, nextAnimation.RotationAngle);
                     break;
                 case AnimationType.Movement:
                     this.AnimateMovingObjects(nextAnimation.SpaceObject, nextAnimation.MovementStart,
