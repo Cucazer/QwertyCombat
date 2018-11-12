@@ -138,9 +138,6 @@ namespace QwertyCombat
 
         private void btnEndTurn_Click(object sender, EventArgs e)
         {
-            MessageBox.Show($"{this.pictureMap.Bounds.Right} x {this.pictureMap.Bounds.Bottom}");
-            this.Width = 1000;
-
             this.gameLogic.EndTurn();
             this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
