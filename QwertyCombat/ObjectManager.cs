@@ -29,7 +29,11 @@ namespace QwertyCombat
         public int SecondPlayerShipCount => this.Ships.Count(sh => sh.Owner == Player.SecondPlayer);
         public int BitmapWidth => this.CombatMap.BitmapWidth;
         public int BitmapHeight => this.CombatMap.BitmapHeight;
-        public Ship ActiveShip { get; set; }
+        public Ship ActiveShip
+        {
+            get { return this.GameState.ActiveShip; }
+            set { this.GameState.ActiveShip = value; }
+        }
 
         public GameState GameState;
 
