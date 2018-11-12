@@ -14,6 +14,8 @@ namespace QwertyCombat
         public Bitmap CurrentBitmap;
 
         private ObjectManager objectManager;
+        private readonly GameState defaultGameState;
+        private GameState gameStateToDraw;
 
         private CombatMap combatMap => this.objectManager.CombatMap;
 
@@ -25,6 +27,8 @@ namespace QwertyCombat
         public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
         {
             this.objectManager = objectManager;
+            this.defaultGameState = objectManager.GameState;
+            this.gameStateToDraw = objectManager.GameState;
             this.CurrentBitmap = new Bitmap(fieldWidth, fieldHeight, PixelFormat.Format32bppRgba);
         }
 
@@ -43,7 +47,7 @@ namespace QwertyCombat
                     break;
                 case AnimationType.Rotation:
                     // maybe save game state
-                    this.AnimateRotation(animationToPerform.CurrentGameState, animationToPerform.SpaceObject, animationToPerform.RotationAngle);
+                    this.AnimateRotation(animationToPerform.SpaceObject, animationToPerform.RotationAngle);
                     break;
                 case AnimationType.Movement:
                     this.AnimateMovingObjects(animationToPerform.SpaceObject, animationToPerform.MovementStart,
@@ -68,13 +72,14 @@ namespace QwertyCombat
             }
 
             var nextAnimation = AnimationQueue.Dequeue();
+            this.gameStateToDraw = nextAnimation.CurrentGameState;
             switch (nextAnimation.AnimationType)
             {
                 case AnimationType.Sprites:
                     this.AnimateAttack(nextAnimation.SpaceObject, nextAnimation.OverlaySprites);
                     break;
                 case AnimationType.Rotation:
-                    this.AnimateRotation(nextAnimation.CurrentGameState, nextAnimation.SpaceObject, nextAnimation.RotationAngle);
+                    this.AnimateRotation(nextAnimation.SpaceObject, nextAnimation.RotationAngle);
                     break;
                 case AnimationType.Movement:
                     this.AnimateMovingObjects(nextAnimation.SpaceObject, nextAnimation.MovementStart,
@@ -97,23 +102,23 @@ namespace QwertyCombat
                     g.DrawPolygon(Pens.Purple, hexagonCorners);
                 }
 
-                if (this.objectManager.ActiveShip != null)
+                if (this.gameStateToDraw.ActiveShip != null)
                 {
                     // highlight active ship attack range
                     Pen redPen = new Pen(Colors.Red, 1);
-                    foreach (var hexagonCorners in this.combatMap.GetAllHexagonCornersInRange(this.objectManager.ActiveShip.ObjectCoordinates, this.objectManager.ActiveShip.EquippedWeapon.AttackRange))
+                    foreach (var hexagonCorners in this.combatMap.GetAllHexagonCornersInRange(this.gameStateToDraw.ActiveShip.ObjectCoordinates, this.gameStateToDraw.ActiveShip.EquippedWeapon.AttackRange))
                     {
                         g.DrawPolygon(redPen, hexagonCorners);
                     }
 
                     // highlight active ship
                     Pen activeShipAriaPen = new Pen(Colors.Purple, 5);
-                    g.DrawPolygon(activeShipAriaPen, this.combatMap.GetHexagonCorners(this.objectManager.ActiveShip.ObjectCoordinates.Column,
-                                                              this.objectManager.ActiveShip.ObjectCoordinates.Row));
+                    g.DrawPolygon(activeShipAriaPen, this.combatMap.GetHexagonCorners(this.gameStateToDraw.ActiveShip.ObjectCoordinates.Column,
+                                                              this.gameStateToDraw.ActiveShip.ObjectCoordinates.Row));
                 }
             }
 
-            foreach (var ship in this.objectManager.Ships)
+            foreach (var ship in this.gameStateToDraw.Ships)
             {
                 if (!ship.IsMoving)
                 {
@@ -121,7 +126,7 @@ namespace QwertyCombat
                 }
             }
 
-            foreach (var meteor in this.objectManager.Meteors)
+            foreach (var meteor in this.gameStateToDraw.Meteors)
             {
                 if (!meteor.IsMoving)
                 {
@@ -266,6 +271,7 @@ namespace QwertyCombat
                 if (++steps >= 10)
                 {
                     animationTimer.Stop();
+                    this.gameStateToDraw = this.defaultGameState;
                     performingAnimation = false;
                     spaceObject.IsMoving = false;
                     this.DrawField();
@@ -301,6 +307,7 @@ namespace QwertyCombat
                 {
                     animationTimer.Stop();
                     // animation fully drawn - redraw initial field
+                    this.gameStateToDraw = this.defaultGameState;
                     this.DrawField();
                     performingAnimation = false;
                     HandleAnimationQueue();
@@ -309,7 +316,7 @@ namespace QwertyCombat
             animationTimer.Start();
         }
 
-        private async void AnimateRotation(SpaceObject spaceObjectInitialState, SpaceObject spaceObject, double angle)
+        private async void AnimateRotation(SpaceObject spaceObject, double angle)
         {
             var totalStepCount = 7;
             spaceObject.IsMoving = true;
@@ -318,7 +325,7 @@ namespace QwertyCombat
             var dAngle = angle / totalStepCount;
 
             //var initialPolygonPoints = spaceObject.PolygonPoints.ToList();
-            var spaceObjectToAnimate = spaceObjectInitialState;
+            var spaceObjectToAnimate = spaceObject;
 
             //var animationCompleted = await WaitForAnimationToComplete();
             var animationTimer = new UITimer { Interval = 0.1 };
@@ -337,6 +344,7 @@ namespace QwertyCombat
                 if (++steps >= totalStepCount)
                 {
                     animationTimer.Stop();
+                    this.gameStateToDraw = this.defaultGameState;
                     performingAnimation = false;
                     //spaceObject.PolygonPoints = initialPolygonPoints;
                     spaceObject.IsMoving = false;
