@@ -66,8 +66,15 @@ namespace QwertyCombat
                 AnimationQueue.Enqueue(animationToPerform);
             }
 
-            if (!AnimationQueue.Any() || performingAnimation)
+            if (performingAnimation)
             {
+                return;
+            }
+
+            if (!AnimationQueue.Any())
+            {
+                this.DrawField();
+                this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 return;
             }
 
@@ -274,7 +281,6 @@ namespace QwertyCombat
                     this.gameStateToDraw = this.defaultGameState;
                     performingAnimation = false;
                     spaceObject.IsMoving = false;
-                    this.DrawField();
                     this.HandleAnimationQueue();
                 }
             };
@@ -306,9 +312,7 @@ namespace QwertyCombat
                 if (++overlaySpriteIndex >= pendingAnimationOverlaySprites.Count)
                 {
                     animationTimer.Stop();
-                    // animation fully drawn - redraw initial field
                     this.gameStateToDraw = this.defaultGameState;
-                    this.DrawField();
                     performingAnimation = false;
                     HandleAnimationQueue();
                 }
@@ -348,7 +352,6 @@ namespace QwertyCombat
                     performingAnimation = false;
                     //spaceObject.PolygonPoints = initialPolygonPoints;
                     spaceObject.IsMoving = false;
-                    this.DrawField();
                     this.HandleAnimationQueue();
                 }
             };
