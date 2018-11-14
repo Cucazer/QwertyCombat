@@ -14,21 +14,30 @@ namespace QwertyCombat
         public List<Ship> Ships => this.SpaceObjects.OfType<Ship>().ToList();
 
         public Ship ActiveShip { get; set; }
+        public SpaceObject ActiveSpaceObject { get; set; }
 
         public GameState(int cellCount)
         {
             this.SpaceObjects = new SpaceObject[cellCount];
         }
 
-        private GameState(SpaceObject[] spaceObjects, Ship activeShip)
+        private GameState(SpaceObject[] spaceObjects)
         {
             this.SpaceObjects = spaceObjects;
-            this.ActiveShip = activeShip;
         }
 
         public object Clone()
         {
-            return new GameState(this.SpaceObjects.Select(x => x == null ? null : (SpaceObject)x.Clone()).ToArray(), ActiveShip == null ? null : (Ship)ActiveShip.Clone());
+            var clonedGameState = new GameState(this.SpaceObjects.Select(x => x == null ? null : (SpaceObject)x.Clone()).ToArray());
+            if (this.ActiveShip != null)
+            {
+                clonedGameState.ActiveShip = clonedGameState.Ships.First(sh => sh.ObjectCoordinates.Equals(this.ActiveShip.ObjectCoordinates));
+            }
+            if (this.ActiveSpaceObject != null)
+            {
+                clonedGameState.ActiveSpaceObject = clonedGameState.SpaceObjects.First(so => so.ObjectCoordinates.Equals(this.ActiveSpaceObject.ObjectCoordinates));
+            }
+            return clonedGameState;
         }
     }
 }
