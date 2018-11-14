@@ -25,28 +25,28 @@ namespace QwertyCombat
         public Point MovementDestination { get; }
         public AnimationType AnimationType { get; }
 
-        public AnimationEventArgs(GameState currentGameState, SpaceObject spaceObject, Point movementStart, Point movementDestination)
+        public AnimationEventArgs(GameState currentGameState, Point movementStart, Point movementDestination)
         {
             this.AnimationType = AnimationType.Movement;
             this.CurrentGameState = currentGameState;
-            this.SpaceObject = spaceObject;
+            this.SpaceObject = currentGameState.ActiveSpaceObject;
             this.MovementStart = movementStart;
             this.MovementDestination = movementDestination;
         }
 
-        public AnimationEventArgs(GameState currentGameState, SpaceObject spaceObject, double rotationAngle)
+        public AnimationEventArgs(GameState currentGameState, double rotationAngle)
         {
             this.AnimationType = AnimationType.Rotation;
             this.CurrentGameState = currentGameState;
-            this.SpaceObject = spaceObject;
+            this.SpaceObject = currentGameState.ActiveSpaceObject;
             this.RotationAngle = rotationAngle;
         }
 
-        public AnimationEventArgs(GameState currentGameState, SpaceObject spaceObject, List<Bitmap> overlaySprites)
+        public AnimationEventArgs(GameState currentGameState, List<Bitmap> overlaySprites)
         {
             this.AnimationType = AnimationType.Sprites;
             this.CurrentGameState = currentGameState;
-            this.SpaceObject = spaceObject;
+            this.SpaceObject = currentGameState.ActiveSpaceObject;
             this.OverlaySprites = overlaySprites;
         }
     }

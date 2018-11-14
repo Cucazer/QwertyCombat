@@ -186,7 +186,7 @@ namespace QwertyCombat
             {
                 SoundPlayed?.Invoke(this, new SoundEventArgs(Properties.Resources.spaceShipFly));
             }
-            ObjectAnimated?.Invoke(this, new AnimationEventArgs((GameState)this.GameState.Clone(), spaceObject, this.CombatMap.HexToPixel(spaceObject.ObjectCoordinates), this.CombatMap.HexToPixel(destination)));
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs(this.CaptureGameState(spaceObject), this.CombatMap.HexToPixel(spaceObject.ObjectCoordinates), this.CombatMap.HexToPixel(destination)));
             if (destination.Column < 0 || destination.Column >= this.MapWidth ||
                 destination.Row < 0 || destination.Row >= this.MapHeight)
             {
@@ -214,7 +214,7 @@ namespace QwertyCombat
                     this.CombatMap.HexToPixel(attackerShip.ObjectCoordinates),
                     this.CombatMap.HexToPixel(victim.ObjectCoordinates));
                 SoundPlayed?.Invoke(this, new SoundEventArgs(attackerShip.EquippedWeapon.AttackSound));
-                ObjectAnimated?.Invoke(this, new AnimationEventArgs((GameState)this.GameState.Clone(), attacker, attackSprites));
+                ObjectAnimated?.Invoke(this, new AnimationEventArgs(this.CaptureGameState(attacker), attackSprites));
                 this.DealDamage(victim, attackerShip.AttackDamage);
                 attackerShip.ActionsLeft -= attackerShip.EquippedWeapon.EnergyСonsumption;
             }
@@ -231,8 +231,18 @@ namespace QwertyCombat
 
         public void RotateObject(SpaceObject spaceObject, double angle)
         {
-            ObjectAnimated?.Invoke(this, new AnimationEventArgs((GameState)this.GameState.Clone(), spaceObject, angle));
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs(this.CaptureGameState(spaceObject), angle));
             spaceObject.Rotate(angle);
+        }
+
+        private GameState CaptureGameState(SpaceObject activeSpaceObject = null)
+        {
+            var capturedGameState = (GameState)this.GameState.Clone();
+            if (activeSpaceObject != null)
+            {
+                capturedGameState.ActiveSpaceObject = capturedGameState.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(activeSpaceObject.ObjectCoordinates.Column, activeSpaceObject.ObjectCoordinates.Row)];
+            }
+            return capturedGameState;
         }
 
         private void CreateShip(ShipType shipType, WeaponType weaponType, Player owner)
