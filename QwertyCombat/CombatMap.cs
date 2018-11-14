@@ -128,8 +128,9 @@ namespace QwertyCombat
         {
             var cubeCoordinates = this.HexGrid.PixelToHex(pixelCoordinates.ConvertToHexPoint()).Round();
             var offsetCoordinates = this.HexGrid.ToOffsetCoordinates(cubeCoordinates);
-            if (offsetCoordinates.Column < 0 || offsetCoordinates.Column > this.FieldWidth ||
-                offsetCoordinates.Row < 0 || offsetCoordinates.Row > this.FieldHeight)
+            // column/row indices are 0-based! => index == width/height is already outside field
+            if (offsetCoordinates.Column < 0 || offsetCoordinates.Column >= this.FieldWidth ||
+                offsetCoordinates.Row < 0 || offsetCoordinates.Row >= this.FieldHeight)
             {
                 throw new ArgumentOutOfRangeException($"Pixel ({pixelCoordinates.X},{pixelCoordinates.Y}) is outside game field.");
             }
