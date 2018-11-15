@@ -34,6 +34,12 @@ namespace QwertyCombat
 
         public void UpdateBitmap(AnimationEventArgs animationToPerform = null)  
         {
+            if (this.performingAnimation)
+            {
+                //don't disturb animation
+                return;
+            }
+
             if (animationToPerform == null)
             {
                 this.DrawField();
@@ -249,13 +255,7 @@ namespace QwertyCombat
             this.HandleAnimationQueue(eventArgs);
         }
 
-        //private async Task<bool> WaitForAnimationToComplete()
-        //{
-        //    while (animationTimer.Started) { }
-        //    return true;
-        //}
-
-        private async void AnimateMovingObjects(SpaceObject spaceObject,PointF movementStartPoint, PointF movementDestinationPoint)
+        private void AnimateMovingObjects(SpaceObject spaceObject,PointF movementStartPoint, PointF movementDestinationPoint)
         {
             // disabling ability to move multiple objects at once, because it kinda hurts turn-based principle, where each object moves on it's own turn
             if (spaceObject == null)
@@ -266,7 +266,6 @@ namespace QwertyCombat
             performingAnimation = true;
             var stepDifference = new SizeF((movementDestinationPoint.X - movementStartPoint.X) / 10, (movementDestinationPoint.Y - movementStartPoint.Y) / 10);
             var currentCoordinates = movementStartPoint;
-            //var animationCompleted = await WaitForAnimationToComplete();
             var animationTimer = new UITimer { Interval = 0.1 };
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
@@ -285,15 +284,6 @@ namespace QwertyCombat
                 }
             };
             animationTimer.Start();
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    currentCoordinates += stepDifference;
-            //    this.DrawField();
-            //    this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates));
-            //    this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
-            //    Thread.Sleep(30);
-            //}
-
         }
         
         private void AnimateAttack(SpaceObject pendingAnimationSpaceObject, List<Bitmap> pendingAnimationOverlaySprites)
@@ -320,7 +310,7 @@ namespace QwertyCombat
             animationTimer.Start();
         }
 
-        private async void AnimateRotation(SpaceObject spaceObject, double angle)
+        private void AnimateRotation(SpaceObject spaceObject, double angle)
         {
             var totalStepCount = 7;
             spaceObject.IsMoving = true;
@@ -328,10 +318,8 @@ namespace QwertyCombat
             angle = angle * Math.PI / 180;
             var dAngle = angle / totalStepCount;
 
-            //var initialPolygonPoints = spaceObject.PolygonPoints.ToList();
             var spaceObjectToAnimate = spaceObject;
 
-            //var animationCompleted = await WaitForAnimationToComplete();
             var animationTimer = new UITimer { Interval = 0.1 };
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
@@ -350,7 +338,6 @@ namespace QwertyCombat
                     animationTimer.Stop();
                     this.gameStateToDraw = this.defaultGameState;
                     performingAnimation = false;
-                    //spaceObject.PolygonPoints = initialPolygonPoints;
                     spaceObject.IsMoving = false;
                     this.HandleAnimationQueue();
                 }
