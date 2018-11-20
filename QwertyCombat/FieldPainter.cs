@@ -24,6 +24,8 @@ namespace QwertyCombat
 
         public event EventHandler BitmapUpdated;
 
+        private double defaultTimerInterval => Eto.Platform.Detect.IsGtk ? 0.1 : 0.01;
+
         public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
         {
             this.objectManager = objectManager;
@@ -39,7 +41,7 @@ namespace QwertyCombat
                 //don't disturb animation
                 return;
             }
-
+            
             if (animationToPerform == null)
             {
                 this.DrawField();
@@ -266,7 +268,7 @@ namespace QwertyCombat
             performingAnimation = true;
             var stepDifference = new SizeF((movementDestinationPoint.X - movementStartPoint.X) / 10, (movementDestinationPoint.Y - movementStartPoint.Y) / 10);
             var currentCoordinates = movementStartPoint;
-            var animationTimer = new UITimer { Interval = 0.1 };
+            var animationTimer = new UITimer { Interval = defaultTimerInterval };
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
@@ -289,7 +291,7 @@ namespace QwertyCombat
         private void AnimateAttack(SpaceObject pendingAnimationSpaceObject, List<Bitmap> pendingAnimationOverlaySprites)
         {
             performingAnimation = true;
-            var animationTimer = new UITimer { Interval = 0.1 };
+            var animationTimer = new UITimer { Interval = defaultTimerInterval };
             var overlaySpriteIndex = 0;
             animationTimer.Elapsed += delegate {
                 this.DrawField();
@@ -320,7 +322,7 @@ namespace QwertyCombat
 
             var spaceObjectToAnimate = spaceObject;
 
-            var animationTimer = new UITimer { Interval = 0.1 };
+            var animationTimer = new UITimer { Interval = defaultTimerInterval };
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
