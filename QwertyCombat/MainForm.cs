@@ -1,4 +1,5 @@
 using System;
+using System.Media;
 using Eto.Forms;
 using Eto.Drawing;
 
@@ -24,7 +25,7 @@ namespace QwertyCombat
         private ObjectManager objectManager => this.gameLogic.objectManager;
         private readonly GameLogic gameLogic = new GameLogic(8, 6);
         private readonly FieldPainter fieldPainter;
-        //private readonly SoundPlayer soundPlayer = new SoundPlayer();
+        private readonly SoundPlayer soundPlayer = new SoundPlayer();
 
         public MainForm()
         {
@@ -56,7 +57,7 @@ namespace QwertyCombat
             this.buttonDebug.Visible = false;
 #endif
 
-            this.checkBoxAudio = new CheckBox { Checked = true, Text = "Audio" };
+            this.checkBoxAudio = new CheckBox { Checked = false, Text = "Audio" };
 
             // Layouting
 
@@ -96,7 +97,7 @@ namespace QwertyCombat
             // constructor code from previous solution            
             this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
             ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
-            //ObjectManager.SoundPlayed += this.OnSoundEffect;
+            ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
             this.fieldPainter.DrawField();
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
@@ -151,26 +152,21 @@ namespace QwertyCombat
             MessageBox.Show("Hello from debug!");
         }
 
-        int step = 0;
         private void OnBitmapUpdated(object sender, EventArgs e)
         {
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
             this.pictureMap.Invalidate();
-            this.labelObjectDescription.Text = $"{step++}";
-            this.labelObjectDescription.Invalidate();
             this.Invalidate();
-            //var bit = (Bitmap)this.pictureMap.Image;
-            //bit.Save($"step{step++}.jpg", ImageFormat.Jpeg);
         }
 
-        //private void OnSoundEffect(object sender, SoundEventArgs e)
-        //{
-        //    if (!this.checkBoxAudio.Checked)
-        //    {
-        //        return;
-        //    }
-        //    this.soundPlayer.Stream = e.AudioStream;
-        //    this.soundPlayer.Play();
-        //}
+        private void OnSoundEffect(object sender, SoundEventArgs e)
+        {
+            if (this.checkBoxAudio.Checked == false)
+            {
+                return;
+            }
+            this.soundPlayer.Stream = e.AudioStream;
+            this.soundPlayer.Play();
+        }
     }
 }
