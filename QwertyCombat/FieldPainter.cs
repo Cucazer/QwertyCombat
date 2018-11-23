@@ -165,6 +165,31 @@ namespace QwertyCombat
                 }
             }
 #endif
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                var d = 100;
+                var offset = 100;
+                double phi = 0 ;
+                var points = new PointF[8];
+                for (int i = 0; i < 8; i++)
+                {
+                    points[i] = new PointF(offset + d * (float)Math.Cos(phi), offset + d * (float)Math.Sin(phi));
+                    phi += 3 * Math.PI / 4;
+                }
+                g.FillPolygon(Colors.LightGreen, points);
+
+                d = 90;
+                phi = Math.PI / 8 ;
+                //points = new PointF[12];
+                for (int i = 0; i < 8; i++)
+                {
+                    points[i] = new PointF(offset + d * (float)Math.Cos(phi), offset + d * (float)Math.Sin(phi));
+                    phi += 3 * Math.PI / 4;
+                }
+                g.FillPolygon(Colors.LightGreen, points);
+
+                g.FillEllipse(Colors.LightGreen, offset - d/2, offset - d/2, d, d);
+            }
         }
 
         private void DrawSpaceObject(SpaceObject spaceObject)
