@@ -165,31 +165,6 @@ namespace QwertyCombat
                 }
             }
 #endif
-            using (var g = new Graphics(this.CurrentBitmap))
-            {
-                var d = 100;
-                var offset = 100;
-                double phi = 0 ;
-                var points = new PointF[8];
-                for (int i = 0; i < 8; i++)
-                {
-                    points[i] = new PointF(offset + d * (float)Math.Cos(phi), offset + d * (float)Math.Sin(phi));
-                    phi += 3 * Math.PI / 4;
-                }
-                g.FillPolygon(Colors.LightGreen, points);
-
-                d = 90;
-                phi = Math.PI / 8 ;
-                //points = new PointF[12];
-                for (int i = 0; i < 8; i++)
-                {
-                    points[i] = new PointF(offset + d * (float)Math.Cos(phi), offset + d * (float)Math.Sin(phi));
-                    phi += 3 * Math.PI / 4;
-                }
-                g.FillPolygon(Colors.LightGreen, points);
-
-                g.FillEllipse(Colors.LightGreen, offset - d/2, offset - d/2, d, d);
-            }
         }
 
         private void DrawSpaceObject(SpaceObject spaceObject)
@@ -369,6 +344,63 @@ namespace QwertyCombat
                     this.HandleAnimationQueue();
                 }
             };
+            animationTimer.Start();
+        }
+
+        private void AnimateExplosion(Point explosionCenter, int explosionRadius)
+        {
+            var totalStepCount = 5;
+            var starColors = new List<Color> { Colors.Red, Colors.Orange, Colors.Yellow };
+            var outerStarRatios = new List<float> { 1, 0.75F, 0.5F };
+            var innerStarRatios = new List<float> { 0.9F, 0.65F, 0.4F };
+            var starVertices = new PointF[8];
+            var vertexAngleRotation = 3 * Math.PI / 4;
+            performingAnimation = true;
+
+            var animationTimer = new UITimer { Interval = defaultTimerInterval };
+            var steps = 0;
+
+            animationTimer.Elapsed += delegate {
+                this.DrawField();
+                
+                var currentExplosionRadius = explosionRadius * (steps + 1) / (float)totalStepCount;
+                using (var g = new Graphics(this.CurrentBitmap))
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        double angleOffset = 0;
+                        for (int j = 0; j < 8; j++)
+                        {
+                            starVertices[j] = explosionCenter + new PointF(outerStarRatios[i] * currentExplosionRadius * (float)Math.Cos(angleOffset),
+                                                                           outerStarRatios[i] * currentExplosionRadius * (float)Math.Sin(angleOffset));
+                            angleOffset += vertexAngleRotation;
+                        }
+                        g.FillPolygon(starColors[i], starVertices);
+
+                        angleOffset = Math.PI / 8;
+                        for (int j = 0; j < 8; j++)
+                        {
+                            starVertices[j] = explosionCenter + new PointF(innerStarRatios[i] * currentExplosionRadius * (float)Math.Cos(angleOffset),
+                                                                           innerStarRatios[i] * currentExplosionRadius * (float)Math.Sin(angleOffset));
+                            angleOffset += vertexAngleRotation;
+                        }
+                        g.FillPolygon(starColors[i], starVertices);
+
+                        //g.FillEllipse(starColors[i], offset - d / 2, offset - d / 2, d, d);
+                    }
+                }
+
+                this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
+
+                if (++steps >= totalStepCount)
+                {
+                    animationTimer.Stop();
+                    this.gameStateToDraw = this.defaultGameState;
+                    performingAnimation = false;
+                    HandleAnimationQueue();
+                }
+            };
+
             animationTimer.Start();
         }
     }
