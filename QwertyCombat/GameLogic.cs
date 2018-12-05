@@ -143,8 +143,8 @@ namespace QwertyCombat
                 }
 
                 this.objectManager.MoveObjectTo(meteor, meteorNextStepCoordinates, true);
-                this.objectManager.DealDamage(objectOnTheWay, meteor.CollisionDamage);
                 this.objectManager.DeleteObject(meteor);
+                this.objectManager.DealDamage(objectOnTheWay, meteor.CollisionDamage);
             }
 
             if (new Random().Next(0, 100) <= ObjectManager.MeteorAppearanceChance)

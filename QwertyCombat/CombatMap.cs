@@ -24,7 +24,7 @@ namespace QwertyCombat
     {
         public readonly int FieldWidth;
         public readonly int FieldHeight;
-        private const float HexagonSideLength = 40;
+        public const float HexagonSideLength = 40;
         private const int FieldBorderPixels = 10;
 
         public Hex.HexLayout<Hex.Point, Hex.PointPolicy> HexGrid = Hex.HexLayoutFactory.CreateFlatHexLayout(

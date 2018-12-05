@@ -61,6 +61,9 @@ namespace QwertyCombat
                     this.AnimateMovingObjects(animationToPerform.SpaceObject, animationToPerform.MovementStart,
                         animationToPerform.MovementDestination);
                     break;
+                case AnimationType.Explosion:
+                    this.AnimateExplosion(animationToPerform.ExplosionCenter, animationToPerform.ExplosionRadius);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -99,6 +102,9 @@ namespace QwertyCombat
                 case AnimationType.Movement:
                     this.AnimateMovingObjects(nextAnimation.SpaceObject, nextAnimation.MovementStart,
                         nextAnimation.MovementDestination);
+                    break;
+                case AnimationType.Explosion:
+                    this.AnimateExplosion(nextAnimation.ExplosionCenter, nextAnimation.ExplosionRadius);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -349,7 +355,7 @@ namespace QwertyCombat
 
         private void AnimateExplosion(Point explosionCenter, int explosionRadius)
         {
-            var totalStepCount = 5;
+            var totalStepCount = 6;
             var starColors = new List<Color> { Colors.Red, Colors.Orange, Colors.Yellow };
             var outerStarRatios = new List<float> { 1, 0.75F, 0.5F };
             var innerStarRatios = new List<float> { 0.9F, 0.65F, 0.4F };
@@ -385,8 +391,6 @@ namespace QwertyCombat
                             angleOffset += vertexAngleRotation;
                         }
                         g.FillPolygon(starColors[i], starVertices);
-
-                        //g.FillEllipse(starColors[i], offset - d / 2, offset - d / 2, d, d);
                     }
                 }
 

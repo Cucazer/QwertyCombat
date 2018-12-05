@@ -222,6 +222,8 @@ namespace QwertyCombat
 
         public void DealDamage(SpaceObject victim, int damageAmount)
         {
+            ObjectAnimated?.Invoke(this, new AnimationEventArgs(this.CaptureGameState(),
+                this.CombatMap.HexToPixel(victim.ObjectCoordinates), (int)(Math.Min(1, 1 - ((victim.CurrentHealth - damageAmount) / (double)victim.MaxHealth)) * CombatMap.HexagonSideLength)));
             victim.CurrentHealth -= damageAmount;
             if (victim.CurrentHealth <= 0)
             {

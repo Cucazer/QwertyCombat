@@ -12,18 +12,21 @@ namespace QwertyCombat
     {
         Movement,
         Rotation,
-        Sprites
+        Sprites,
+        Explosion
     }
     
     class AnimationEventArgs: EventArgs
     {
+        public AnimationType AnimationType { get; }
         public GameState CurrentGameState { get; }
         public SpaceObject SpaceObject { get; }
         public Point MovementStart { get; }
-        public List<Bitmap> OverlaySprites { get; }
         public double RotationAngle { get; }
         public Point MovementDestination { get; }
-        public AnimationType AnimationType { get; }
+        public List<Bitmap> OverlaySprites { get; }
+        public Point ExplosionCenter { get; }
+        public int ExplosionRadius { get; }
 
         public AnimationEventArgs(GameState currentGameState, Point movementStart, Point movementDestination)
         {
@@ -48,6 +51,14 @@ namespace QwertyCombat
             this.CurrentGameState = currentGameState;
             this.SpaceObject = currentGameState.ActiveSpaceObject;
             this.OverlaySprites = overlaySprites;
+        }
+
+        public AnimationEventArgs(GameState currentGameState, Point explosionCenter, int explosionRadius)
+        {
+            this.AnimationType = AnimationType.Explosion;
+            this.CurrentGameState = currentGameState;
+            this.ExplosionCenter = explosionCenter;
+            this.ExplosionRadius = explosionRadius;
         }
     }
 }
