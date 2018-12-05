@@ -132,6 +132,13 @@ namespace QwertyCombat
                         g.DrawPolygon(redPen, hexagonCorners);
                     }
 
+                    // highlight active ship movement range
+                    var highlightColor = new Color(Colors.Lime, 0.35F);
+                    foreach (var hexagonCorners in this.combatMap.GetAllHexagonCornersInRange(this.gameStateToDraw.ActiveShip.ObjectCoordinates, this.gameStateToDraw.ActiveShip.ActionsLeft))
+                    {
+                        g.FillPolygon(highlightColor, hexagonCorners);
+                    }
+
                     // highlight active ship
                     Pen activeShipAriaPen = new Pen(Colors.Purple, 5);
                     g.DrawPolygon(activeShipAriaPen, this.combatMap.GetHexagonCorners(this.gameStateToDraw.ActiveShip.ObjectCoordinates.Column,
@@ -204,8 +211,12 @@ namespace QwertyCombat
             var meteorRadius = 15;
             using (var g = new Graphics(this.CurrentBitmap))
             {
-                g.FillEllipse(Brushes.Gray,
+                g.FillEllipse(Colors.DarkGray,
                     new Rectangle(meteorCoordinates - meteorRadius, new Size(2 * meteorRadius, 2 * meteorRadius)));
+                // TODO: add dark spots
+                int spotRadius = (int)(meteorRadius / 3.0);
+                g.FillEllipse(Colors.DimGray, new Rectangle(meteorCoordinates - spotRadius, new Size(spotRadius, spotRadius)));
+
                 g.DrawText(Fonts.Sans(8), Brushes.Red, meteorCoordinates + new Size(5, -25), meteor.CurrentHealth.ToString());
                 // TODO: better indicate meteor's way
                 var directionAngle = 60 * (int)meteor.MovementDirection - 30;
@@ -227,9 +238,6 @@ namespace QwertyCombat
                     var beamEndPoint = beamStartPoint + new Size((int)(-20 * Math.Cos(directionAngleRadians)), (int)(20 * Math.Sin(directionAngleRadians)));
                     g.DrawLine(new Pen(Colors.Yellow, 2), meteorCoordinates + beamStartPoint, meteorCoordinates + beamEndPoint);
                 }
-
-                g.DrawArc(new Pen(Colors.Blue, 2), meteorCoordinates.X - 10,
-                    meteorCoordinates.Y - 10, 20, 20, -directionAngle + 20, -40); // start and sweep angles counted clockwise
             }
         }
 
