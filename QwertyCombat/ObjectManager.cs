@@ -71,6 +71,18 @@ namespace QwertyCombat
             return this.CombatMap.AreNeighbors(spaceObject.ObjectCoordinates, destination);
         }
 
+        public List<Hex.OffsetCoordinates> GetMovementRange(Ship ship)
+        {
+            var hexagonsInRange = this.CombatMap.GetAllHexagonsInRange(ship.ObjectCoordinates, ship.ActionsLeft);
+            return hexagonsInRange.Where(c => this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(c)] == null).ToList();
+        }
+
+        public List<Hex.OffsetCoordinates> GetAttackTargets(Ship ship)
+        {
+            var hexagonsInAttackRange = this.CombatMap.GetAllHexagonsInRange(ship.ObjectCoordinates, ship.EquippedWeapon.AttackRange);
+            return hexagonsInAttackRange.Where(c => (this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(c)]?.Owner ?? ship.Owner) != ship.Owner).ToList();
+        }
+
         public void DeleteObject(SpaceObject spaceObject)
         {
             this.SpaceObjects[Array.IndexOf(this.SpaceObjects, spaceObject)] = null;
@@ -94,6 +106,11 @@ namespace QwertyCombat
         public void SetObjectAtOffsetCoordinates(SpaceObject spaceObject, int column, int row)
         {
             this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(column, row)] = spaceObject;
+        }
+
+        private int GetObjectIndexByOffsetCoordinates(Hex.OffsetCoordinates offsetCoordinates)
+        {
+            return this.GetObjectIndexByOffsetCoordinates(offsetCoordinates.Column, offsetCoordinates.Row);
         }
 
         private int GetObjectIndexByOffsetCoordinates(int column, int row)

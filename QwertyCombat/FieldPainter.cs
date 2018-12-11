@@ -132,11 +132,19 @@ namespace QwertyCombat
                         g.DrawPolygon(redPen, hexagonCorners);
                     }
 
-                    // highlight active ship movement range
-                    var highlightColor = new Color(Colors.Lime, 0.35F);
-                    foreach (var hexagonCorners in this.combatMap.GetAllHexagonCornersInRange(this.gameStateToDraw.ActiveShip.ObjectCoordinates, this.gameStateToDraw.ActiveShip.ActionsLeft))
+                    // highlight active ship attack targets
+                    var highlightColor = new Color(Colors.Red, 0.35F);
+                    foreach (var targetCell in this.objectManager.GetAttackTargets(this.gameStateToDraw.ActiveShip))
                     {
-                        g.FillPolygon(highlightColor, hexagonCorners);
+                        g.FillPolygon(highlightColor, this.combatMap.GetHexagonCorners(targetCell));
+                    }
+
+
+                    // highlight active ship movement range
+                    highlightColor = new Color(Colors.Lime, 0.35F);
+                    foreach (var availableCell in this.objectManager.GetMovementRange(this.gameStateToDraw.ActiveShip))
+                    {
+                        g.FillPolygon(highlightColor, this.combatMap.GetHexagonCorners(availableCell));
                     }
 
                     // highlight active ship
