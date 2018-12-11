@@ -74,13 +74,18 @@ namespace QwertyCombat
         public List<Hex.OffsetCoordinates> GetMovementRange(Ship ship)
         {
             var hexagonsInRange = this.CombatMap.GetAllHexagonsInRange(ship.ObjectCoordinates, ship.ActionsLeft);
-            return hexagonsInRange.Where(c => this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(c)] == null).ToList();
+            return hexagonsInRange.Where(c => this.SpaceObjects[this.OffsetCoordinatesToIndex(c)] == null).ToList();
         }
 
         public List<Hex.OffsetCoordinates> GetAttackTargets(Ship ship)
         {
             var hexagonsInAttackRange = this.CombatMap.GetAllHexagonsInRange(ship.ObjectCoordinates, ship.EquippedWeapon.AttackRange);
-            return hexagonsInAttackRange.Where(c => (this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(c)]?.Owner ?? ship.Owner) != ship.Owner).ToList();
+            return hexagonsInAttackRange.Where(c => (this.SpaceObjects[this.OffsetCoordinatesToIndex(c)]?.Owner ?? ship.Owner) != ship.Owner).ToList();
+        }
+
+        public void AddObject(SpaceObject spaceObject)
+        {
+            this.SpaceObjects[this.OffsetCoordinatesToIndex(spaceObject.ObjectCoordinates)] = spaceObject;
         }
 
         public void DeleteObject(SpaceObject spaceObject)
@@ -94,30 +99,18 @@ namespace QwertyCombat
             {
                 return null;
             }
-            return this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(column, row)];
-        }
-        
-        public void SetObjectAtOffsetCoordinates(SpaceObject spaceObject)
-        {
-            // TODO: rename before using - no coordinates in parameters
-            this.SetObjectAtOffsetCoordinates(spaceObject, spaceObject.ObjectCoordinates.Column, spaceObject.ObjectCoordinates.Row);
+            return this.SpaceObjects[this.OffsetCoordinatesToIndex(column, row)];
         }
 
-        public void SetObjectAtOffsetCoordinates(SpaceObject spaceObject, int column, int row)
+        private int OffsetCoordinatesToIndex(Hex.OffsetCoordinates offsetCoordinates)
         {
-            this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(column, row)] = spaceObject;
+            return this.OffsetCoordinatesToIndex(offsetCoordinates.Column, offsetCoordinates.Row);
         }
 
-        private int GetObjectIndexByOffsetCoordinates(Hex.OffsetCoordinates offsetCoordinates)
-        {
-            return this.GetObjectIndexByOffsetCoordinates(offsetCoordinates.Column, offsetCoordinates.Row);
-        }
-
-        private int GetObjectIndexByOffsetCoordinates(int column, int row)
+        private int OffsetCoordinatesToIndex(int column, int row)
         {
             return row * this.MapWidth + column;
         }
-
 
         public int GetDistance(SpaceObject firstObject, SpaceObject secondObject)
         {
@@ -167,8 +160,7 @@ namespace QwertyCombat
             var meteorHealth = rand.Next(1, 150);
             var meteorDmg = meteorHealth / 4;
 
-            var newMeteor = new Meteor(meteorCoordinates, meteorHealth, meteorDmg, movementDirection);
-            this.SetObjectAtOffsetCoordinates(newMeteor, meteorCoordinates.Column, meteorCoordinates.Row);
+            this.AddObject(new Meteor(meteorCoordinates, meteorHealth, meteorDmg, movementDirection));
         }
 
         public double GetRelativeHexagonAngle(SpaceObject sourceSpaceObject, Hex.OffsetCoordinates targetOffsetCoordinates)
@@ -217,8 +209,8 @@ namespace QwertyCombat
                 return;
             }
 
-            this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(spaceObject.ObjectCoordinates.Column, spaceObject.ObjectCoordinates.Row)] = null;
-            this.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(destination.Column, destination.Row)] = spaceObject;
+            this.SpaceObjects[this.OffsetCoordinatesToIndex(spaceObject.ObjectCoordinates)] = null;
+            this.SpaceObjects[this.OffsetCoordinatesToIndex(destination)] = spaceObject;
             spaceObject.ObjectCoordinates = destination;
         }
 
@@ -259,7 +251,7 @@ namespace QwertyCombat
             var capturedGameState = (GameState)this.GameState.Clone();
             if (activeSpaceObject != null)
             {
-                capturedGameState.ActiveSpaceObject = capturedGameState.SpaceObjects[this.GetObjectIndexByOffsetCoordinates(activeSpaceObject.ObjectCoordinates.Column, activeSpaceObject.ObjectCoordinates.Row)];
+                capturedGameState.ActiveSpaceObject = capturedGameState.SpaceObjects[this.OffsetCoordinatesToIndex(activeSpaceObject.ObjectCoordinates)];
             }
             return capturedGameState;
         }
@@ -282,7 +274,7 @@ namespace QwertyCombat
             int minColumnIndex = owner == Player.FirstPlayer ? 0 : this.MapWidth - 2;
             int maxColumnIndex = owner == Player.FirstPlayer ? 1 : this.MapWidth - 1;
             newShip.ObjectCoordinates = this.GetRandomVacantHexagon(minColumnIndex, maxColumnIndex, 0, this.MapHeight - 1);
-            this.SetObjectAtOffsetCoordinates(newShip, newShip.ObjectCoordinates.Column, newShip.ObjectCoordinates.Row);
+            this.AddObject(newShip);
         }
 
         private Hex.OffsetCoordinates GetRandomVacantHexagon(int minColumnIndex, int maxColumnIndex, int minRowIndex, int maxRowIndex)
