@@ -24,7 +24,7 @@ namespace QwertyCombat
 
         public event EventHandler BitmapUpdated;
 
-        private double defaultTimerInterval => Eto.Platform.Detect.IsGtk ? 0.1 : 0.01;
+        private double defaultTimerInterval => Eto.Platform.Detect.IsGtk ? 0.07 : 0.01;
 
         public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
         {
@@ -267,7 +267,7 @@ namespace QwertyCombat
                 else
                     generalBrush = new SolidBrush(Colors.Gray);
 
-                var myPointArray = ship.PolygonPoints.Select(p => p + shipCoordinates).ToArray();
+                var myPointArray = ship.ObjectAppearance.OfType<Polygon>().ToList()[0].Points.Select(p => p + shipCoordinates).ToArray();
                 g.FillPolygon(generalBrush, myPointArray);
                 g.DrawText(Fonts.Sans(8), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
                 g.DrawText(Fonts.Sans(8), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
@@ -348,11 +348,12 @@ namespace QwertyCombat
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
-                for (int j = 0; j < spaceObjectToAnimate.PolygonPoints.Count; j++)
+                // TODO: replace with spaceObjectToAnimate.Rotate(), this isn't working now
+                for (int j = 0; j < spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points.Count; j++)
                 {
-                    spaceObjectToAnimate.PolygonPoints[j] =
-                        new PointF((float)(spaceObjectToAnimate.PolygonPoints[j].X * Math.Cos(dAngle) - spaceObjectToAnimate.PolygonPoints[j].Y * Math.Sin(dAngle)),
-                            (float)(spaceObjectToAnimate.PolygonPoints[j].X * Math.Sin(dAngle) + spaceObjectToAnimate.PolygonPoints[j].Y * Math.Cos(dAngle)));
+                    spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j] =
+                        new PointF((float)(spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].X * Math.Cos(dAngle) - spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].Y * Math.Sin(dAngle)),
+                            (float)(spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].X * Math.Sin(dAngle) + spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].Y * Math.Cos(dAngle)));
                 }
                 this.DrawField();
                 this.DrawSpaceObject(spaceObjectToAnimate);

@@ -22,7 +22,8 @@ namespace QwertyCombat.Objects
 
         public readonly Player Owner;
 
-        public List<PointF> PolygonPoints;
+        //public List<PointF> PolygonPoints;
+        public List<DrawableShape> ObjectAppearance;
 
         protected SpaceObject(Player owner, int maxHealth, ObjectType objectType, int maxActions)
         {

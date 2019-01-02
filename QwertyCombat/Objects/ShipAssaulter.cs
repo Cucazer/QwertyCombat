@@ -18,7 +18,7 @@ namespace QwertyCombat.Objects
 
         public ShipAssaulter(Player playerId, WeaponType weaponType) : base(playerId, weaponType, 100, 2)
         {
-            this.PolygonPoints = new List<PointF>
+            var polygonPoints = new List<PointF>
             {
                 new PointF(-16, -15),
                 new PointF(6, -10),
@@ -27,7 +27,9 @@ namespace QwertyCombat.Objects
                 new PointF(-16, 15),  
             };
 
-            this.WeaponPoint = this.PolygonPoints[2];
+            this.WeaponPoint = polygonPoints[2];
+            
+            this.ObjectAppearance = new List<DrawableShape> { new Polygon(new Point(0,0), new Color(), polygonPoints, true)};
 
             if (this.Owner == Player.SecondPlayer)
             {
