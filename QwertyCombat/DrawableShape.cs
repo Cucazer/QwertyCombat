@@ -8,11 +8,13 @@ namespace QwertyCombat
     {
         public Point Origin { get; private set; }
         public Color Color { get; private set; }
+        public bool IsTeamColor { get; private set; }
 
         public DrawableShape(Point origin, Color color, bool isTeamColor = false)
         {
-            this.Color = color;
             this.Origin = origin;
+            this.Color = color;
+            this.IsTeamColor = isTeamColor;
         }
 
         public abstract void Rotate(double angle);
