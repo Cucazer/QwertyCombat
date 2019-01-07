@@ -26,6 +26,13 @@ namespace QwertyCombat
 
         private double defaultTimerInterval => Eto.Platform.Detect.IsGtk ? 0.07 : 0.01;
 
+        private Dictionary<Player, Color> teamColors = new Dictionary<Player, Color>
+        {
+            { Player.FirstPlayer, Colors.Blue },
+            { Player.SecondPlayer, Colors.Red },
+            { Player.None, Colors.Gray }
+        };
+
         public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
         {
             this.objectManager = objectManager;
@@ -256,21 +263,44 @@ namespace QwertyCombat
 
         private void DrawShip(Ship ship, Point shipCoordinates)
         {
+            foreach (var shape in ship.ObjectAppearance)
+            {
+                this.DrawShape(shape, teamColors[ship.Owner], shipCoordinates);
+            }
+
             using (var g = new Graphics(this.CurrentBitmap))
             {
-                SolidBrush generalBrush;
-
-                if (ship.Owner == Player.FirstPlayer)
-                    generalBrush = new SolidBrush(Colors.Blue);
-                else if (ship.Owner == Player.SecondPlayer)
-                    generalBrush = new SolidBrush(Colors.Red);
-                else
-                    generalBrush = new SolidBrush(Colors.Gray);
-
-                var myPointArray = ship.ObjectAppearance.OfType<Polygon>().ToList()[0].Points.Select(p => p + shipCoordinates).ToArray();
-                g.FillPolygon(generalBrush, myPointArray);
                 g.DrawText(Fonts.Sans(8), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
                 g.DrawText(Fonts.Sans(8), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
+            }
+        }
+
+        private void DrawShape(DrawableShape shape, Color teamColor, Point offset)
+        {
+            switch (shape)
+            {
+                case Ellipsis e:
+                    this.DrawEllipsis(e, teamColor, offset);
+                    break;
+                case Polygon p:
+                    this.DrawPolygon(p, teamColor, offset);
+                    break;
+                default:
+                    throw new ArgumentException($"Drawing of {shape.GetType()} not supported");
+            }
+        }
+
+        private void DrawEllipsis(Ellipsis ellipsis, Color teamColor, Point offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DrawPolygon(Polygon polygon, Color teamColor, Point offset)
+        {
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                g.FillPolygon(polygon.IsTeamColor ? teamColor : polygon.Color,
+                    polygon.Points.Select(p => p + offset).ToArray());
             }
         }
 
@@ -339,7 +369,6 @@ namespace QwertyCombat
             var totalStepCount = 7;
             spaceObject.IsMoving = true;
             performingAnimation = true;
-            angle = angle * Math.PI / 180;
             var dAngle = angle / totalStepCount;
 
             var spaceObjectToAnimate = spaceObject;
@@ -348,13 +377,7 @@ namespace QwertyCombat
             var steps = 0;
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
-                // TODO: replace with spaceObjectToAnimate.Rotate(), this isn't working now
-                for (int j = 0; j < spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points.Count; j++)
-                {
-                    spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j] =
-                        new PointF((float)(spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].X * Math.Cos(dAngle) - spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].Y * Math.Sin(dAngle)),
-                            (float)(spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].X * Math.Sin(dAngle) + spaceObjectToAnimate.ObjectAppearance.OfType<Polygon>().ToList()[0].Points[j].Y * Math.Cos(dAngle)));
-                }
+                spaceObjectToAnimate.Rotate(dAngle);
                 this.DrawField();
                 this.DrawSpaceObject(spaceObjectToAnimate);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
