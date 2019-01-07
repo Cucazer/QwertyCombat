@@ -220,7 +220,7 @@ namespace QwertyCombat
             if (attackerShip != null)
             {
                 var attackSprites = attackerShip.EquippedWeapon.GetAttackSprites(
-                    this.CombatMap.HexToPixel(attackerShip.ObjectCoordinates),
+                    this.CombatMap.HexToPixel(attackerShip.ObjectCoordinates) + attackerShip.WeaponPoint,
                     this.CombatMap.HexToPixel(victim.ObjectCoordinates));
                 SoundPlayed?.Invoke(this, new SoundEventArgs(attackerShip.EquippedWeapon.AttackSound));
                 ObjectAnimated?.Invoke(this, new AnimationEventArgs(this.CaptureGameState(attacker), attackSprites));
