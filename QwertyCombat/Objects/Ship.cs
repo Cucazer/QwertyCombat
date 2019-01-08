@@ -46,13 +46,11 @@ namespace QwertyCombat.Objects
 
         public override void Rotate(double angle)
         {
-            angle = angle * Math.PI / 180;
             foreach (var shape in this.ObjectAppearance)
             {
                 shape.Rotate(angle);
             }
-            this.WeaponPoint = new PointF((float) (this.WeaponPoint.X * Math.Cos(angle) - this.WeaponPoint.Y * Math.Sin(angle)),
-                (float) (this.WeaponPoint.X * Math.Sin(angle) + this.WeaponPoint.Y * Math.Cos(angle)));
+            this.WeaponPoint.Rotate((float)angle);
         }
 
         public void RefillEnergy()

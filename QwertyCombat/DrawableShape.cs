@@ -49,9 +49,9 @@ namespace QwertyCombat
         {
             for (int i = 0; i < this.Points.Count; i++)
             {
-                this.Points[i] =
-                    new PointF((float) (this.Points[i].X * Math.Cos(angle) - this.Points[i].Y * Math.Sin(angle)),
-                        (float) (this.Points[i].X * Math.Sin(angle) + this.Points[i].Y * Math.Cos(angle)));
+                var rotatedPoint = new PointF((SizeF)this.Points[i]);
+                rotatedPoint.Rotate((float)angle);
+                this.Points[i] = rotatedPoint;
             }
         }
     }
