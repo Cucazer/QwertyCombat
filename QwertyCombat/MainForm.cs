@@ -37,6 +37,7 @@ namespace QwertyCombat
 
             this.pictureMap = new ImageView { BackgroundColor = Colors.LightBlue };
             this.pictureMap.MouseDown += this.pictureMap_MouseClick;
+            this.pictureMap.MouseMove += this.pictureMap_MouseMove;
 
             this.labelObjectDescription = new Label();
 
@@ -135,6 +136,30 @@ namespace QwertyCombat
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
             this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
             this.UpdateShipCount();
+        }
+
+        private void pictureMap_MouseMove(object sender, MouseEventArgs e)
+        {
+            var objectDescription = this.gameLogic.HandleFieldHover((Point)e.Location);
+            if (objectDescription != null)
+            {
+                this.fieldPainter.DrawField();
+                //MessageBox.Show(objectDescription);
+                //this.fieldPainter.DrawSpaceObjectDescription((Point)e.Location); ???
+                var textBoxSize = new Size(120, 70);
+                var textBoxLocation = e.Location + new Size(10,5);
+                if (!this.pictureMap.Bounds.Size.Contains((Point)e.Location + textBoxSize))
+                {
+                    textBoxLocation -= textBoxSize + new Size(10, 5);
+                }
+                using (var g = new Graphics(this.fieldPainter.CurrentBitmap))
+                {
+                    g.FillRectangle(Colors.Black, new Rectangle((Point)textBoxLocation, textBoxSize));
+                    g.DrawRectangle(Colors.Red, new Rectangle((Point)textBoxLocation, textBoxSize));
+                    g.DrawText(Fonts.Sans(7), Colors.Lime, textBoxLocation + new Size(5, 5), objectDescription);
+                }
+                this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
+            }
         }
 
         private void btnEndTurn_Click(object sender, EventArgs e)

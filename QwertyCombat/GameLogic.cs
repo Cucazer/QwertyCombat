@@ -90,6 +90,24 @@ namespace QwertyCombat
             }
         }
 
+        public string HandleFieldHover(Point moveLocation)
+        {
+            //OffsetCoordinates clickedHexagon;
+            SpaceObject hoveredObject;
+            try
+            {
+                //clickedHexagon = this.objectManager.PixelToOffsetCoordinates(clickLocation);
+                hoveredObject = this.objectManager.PixelToSpaceObject(moveLocation);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // clicked pixel outside game field
+                return null;
+            }
+
+            return hoveredObject?.Description ?? null;
+        }
+
         private void ActiveShipAttack(SpaceObject enemyObject)
         {
             if (this.activeShip.EquippedWeapon.AttackRange < this.objectManager.GetDistance(this.activeShip, enemyObject) || this.activeShip.ActionsLeft < this.activeShip.EquippedWeapon.EnergyСonsumption)
