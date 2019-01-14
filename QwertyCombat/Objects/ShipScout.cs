@@ -29,9 +29,15 @@ namespace QwertyCombat.Objects
             var windowPoints = new List<PointF>
             {
                 new PointF(-7, 0),
-                new PointF(-7, 6),
+                new PointF(-7, -6),
                 new PointF(9, 0)
             };
+
+            if (playerId == Player.SecondPlayer)
+            {
+                // hotfix, assuming Rotate(180)
+                windowPoints = windowPoints.Select(p => new PointF(p.X, -p.Y)).ToList();
+            }
 
             var weaponPoints = new List<PointF>
             {
