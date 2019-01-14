@@ -195,6 +195,41 @@ namespace QwertyCombat
 #endif
         }
 
+        bool tooltipShown = false;
+        public void ActivateTooltip(Point location, string text)
+        {
+            if (this.performingAnimation)
+            { 
+                return;
+            }
+            this.tooltipShown = true;
+            this.DrawField();
+            // extract to DrawTooltip?
+            var textBoxSize = new Size(120, 70);
+            var textBoxLocation = location + new Size(10, 5);
+            if (!this.CurrentBitmap.Size.Contains(location + textBoxSize))
+            {
+                textBoxLocation -= textBoxSize + new Size(10, 5); // fix for bottom-left and top-right corners!
+            }
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                g.FillRectangle(Colors.Black, new Rectangle(textBoxLocation, textBoxSize));
+                g.DrawRectangle(Colors.Red, new Rectangle(textBoxLocation, textBoxSize));
+                g.DrawText(Fonts.Sans(7), Colors.Lime, textBoxLocation + new Size(5, 5), text);
+            }
+            this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void DeactivateTooltip()
+        {
+            if (this.tooltipShown)
+            {
+                this.DrawField();
+                this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
+                this.tooltipShown = false;
+            }
+        }
+
         private void DrawSpaceObject(SpaceObject spaceObject)
         {
             this.DrawSpaceObject(spaceObject, this.combatMap.HexToPixel(spaceObject.ObjectCoordinates));
