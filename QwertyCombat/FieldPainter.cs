@@ -273,13 +273,13 @@ namespace QwertyCombat
                 var directionAngleRadians = (float)directionAngle / 180 * Math.PI;
                 var beamStartAngles = new List<double>
                 {
-                    directionAngleRadians + Math.PI / 2,
-                    directionAngleRadians + 5 * Math.PI / 6,
+                    //directionAngleRadians + Math.PI / 2,
+                    //directionAngleRadians + 5 * Math.PI / 6,
                     //directionAngleRadians + 7 * Math.PI / 8,
                     directionAngleRadians + Math.PI,
                     //directionAngleRadians + 9 * Math.PI / 8,
-                    directionAngleRadians + 7 * Math.PI / 6,
-                    directionAngleRadians + 3 * Math.PI / 2
+                    //directionAngleRadians + 7 * Math.PI / 6,
+                    //directionAngleRadians + 3 * Math.PI / 2
                 };
                 foreach (var beamStartAngle in beamStartAngles)
                 {
@@ -288,6 +288,19 @@ namespace QwertyCombat
                     var beamEndPoint = beamStartPoint + new Size((int)(-20 * Math.Cos(directionAngleRadians)), (int)(20 * Math.Sin(directionAngleRadians)));
                     g.DrawLine(new Pen(Colors.Yellow, 2), meteorCoordinates + beamStartPoint, meteorCoordinates + beamEndPoint);
                 }
+
+
+                var phi0 = Math.PI / 4;
+                var touchPoint = new PointF(meteorRadius * (float) Math.Cos(phi0), meteorRadius * (float)Math.Sin(phi0));
+                g.DrawLine(Colors.Green, meteorCoordinates + touchPoint, meteorCoordinates + touchPoint + new SizeF(2,2));
+                float beamLength = meteorRadius * 1.5F;
+                var arcDistance = meteorRadius / 3;
+                var newBeamStartPoint = new PointF(0, meteorRadius + beamLength);
+                var angleStartToTouch = touchPoint.AngleTo(newBeamStartPoint);
+                var spanAngle = 180 - 2 * (90 - (angleStartToTouch - 90));
+                float arcRadius = (float) ((meteorRadius + beamLength) - touchPoint.Y / Math.Sin(spanAngle * Math.PI / 180));
+                var beamPen = new Pen(Colors.Red, 5);
+                g.DrawArc(beamPen, meteorCoordinates.X, meteorCoordinates.Y + newBeamStartPoint.Y - arcRadius, arcRadius, arcRadius, 180, spanAngle);
             }
         }
 
