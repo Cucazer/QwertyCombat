@@ -289,18 +289,26 @@ namespace QwertyCombat
                     g.DrawLine(new Pen(Colors.Yellow, 2), meteorCoordinates + beamStartPoint, meteorCoordinates + beamEndPoint);
                 }
 
+                var flameSweepsOnMeteor = new Dictionary<Color, double> { { Colors.Orange, 2 * Math.PI / 3 }, { Colors.Red, Math.PI / 4 } };
+                float flameSpanAngle  = (float)Math.PI / 4;
+                float flameSpanAngleDegrees = (float)(flameSpanAngle * 180 / Math.PI);
 
-                var phi0 = Math.PI / 4;
-                var touchPoint = new PointF(meteorRadius * (float) Math.Cos(phi0), meteorRadius * (float)Math.Sin(phi0));
-                g.DrawLine(Colors.Green, meteorCoordinates + touchPoint, meteorCoordinates + touchPoint + new SizeF(2,2));
-                float beamLength = meteorRadius * 1.5F;
-                var arcDistance = meteorRadius / 3;
-                var newBeamStartPoint = new PointF(0, meteorRadius + beamLength);
-                var angleStartToTouch = touchPoint.AngleTo(newBeamStartPoint);
-                var spanAngle = 180 - 2 * (90 - (angleStartToTouch - 90));
-                float arcRadius = (float) ((meteorRadius + beamLength) - touchPoint.Y / Math.Sin(spanAngle * Math.PI / 180));
-                var beamPen = new Pen(Colors.Red, 5);
-                g.DrawArc(beamPen, meteorCoordinates.X, meteorCoordinates.Y + newBeamStartPoint.Y - arcRadius, arcRadius, arcRadius, 180, spanAngle);
+                foreach (var flameSweep in flameSweepsOnMeteor)
+                {
+                    float flameBaseLengthHalf = meteorRadius * (float)Math.Sin(flameSweep.Value / 2);
+                    float flameHeight = flameBaseLengthHalf / (float)Math.Tan(flameSpanAngle / 2);
+                    // arcSpanAngle = 180 - 2 * (90 - flameSpanAngle/2) = 180 - 180 + 2 * flameSpanAngle/2 = flameSpanAngle
+                    float arcRadius = flameHeight / (float) Math.Sin(flameSpanAngle);
+                    
+                    var path = new GraphicsPath();
+                    path.AddArc(meteorCoordinates.X - meteorRadius, meteorCoordinates.Y - meteorRadius,
+                        2 * meteorRadius, 2 * meteorRadius, 90 - (float)(flameSweep.Value/2 * 180 / Math.PI), (float)(flameSweep.Value * 180 / Math.PI));
+                    path.AddArc(meteorCoordinates.X - 2 * arcRadius, meteorCoordinates.Y + meteorRadius * (float) Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius,
+                        2 * arcRadius, 2 * arcRadius, -flameSpanAngleDegrees, flameSpanAngleDegrees);
+                    path.AddArc(meteorCoordinates.X, meteorCoordinates.Y + meteorRadius * (float) Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius,
+                        2 * arcRadius, 2 * arcRadius, 180, flameSpanAngleDegrees);
+                    g.FillPath(flameSweep.Key, path);
+                }
             }
         }
 
