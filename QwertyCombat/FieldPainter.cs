@@ -335,7 +335,7 @@ namespace QwertyCombat
         {
             switch (shape)
             {
-                case Ellipsis e:
+                case Ellipse e:
                     this.DrawEllipsis(e, teamColor, offset);
                     break;
                 case Polygon p:
@@ -346,7 +346,7 @@ namespace QwertyCombat
             }
         }
 
-        private void DrawEllipsis(Ellipsis ellipsis, Color teamColor, Point offset)
+        private void DrawEllipsis(Ellipse ellipse, Color teamColor, Point offset)
         {
             throw new NotImplementedException();
         }
