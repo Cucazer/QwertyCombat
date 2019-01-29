@@ -20,11 +20,11 @@ namespace QwertyCombat
         public abstract void Rotate(double angle);
     }
 
-    public class Ellipsis : DrawableShape
+    public class Ellipse : DrawableShape
     {
         public Size Size { get; private set; }
         
-        public Ellipsis(Point origin, Color color, Size size, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        public Ellipse(Point origin, Color color, Size size, bool isTeamColor = false) : base(origin, color, isTeamColor)
         {
             this.Size = size;
         }
@@ -52,6 +52,46 @@ namespace QwertyCombat
                 var rotatedPoint = new PointF((SizeF)this.Points[i]);
                 rotatedPoint.Rotate((float)angle);
                 this.Points[i] = rotatedPoint;
+            }
+        }
+    }
+
+    public class Arc : DrawableShape
+    {
+        public float Width { get; private set; }
+        public float Height { get; private set; }
+        public float StartAngle { get; private set; }
+        public float SweepAngle { get; private set; }
+
+        public Arc(Point origin, Color color, float width, float height, float startAngle, float sweepAngle, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        {
+            this.Width = width;
+            this.Height = height;
+            this.StartAngle = startAngle;
+            this.SweepAngle = sweepAngle;
+        }
+
+        public override void Rotate(double angle)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class Path : DrawableShape
+    {
+        public List<DrawableShape> Components { get; private set; }
+
+        public Path(Point origin, Color color, List<DrawableShape> components, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        {
+            this.Components = components;
+        }
+
+
+        public override void Rotate(double angle)
+        {
+            foreach (var component in this.Components)
+            {
+                component.Rotate(angle);
             }
         }
     }
