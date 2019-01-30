@@ -46,10 +46,9 @@ namespace QwertyCombat.Objects
                 var pathComponents = new List<DrawableShape>();
                 pathComponents.Add(new Arc(new Point(- meteorRadius, - meteorRadius), new Color(),
                     2 * meteorRadius, 2 * meteorRadius, 90 - (float)(flameSweep.Value / 2 * 180 / Math.PI), (float)(flameSweep.Value * 180 / Math.PI)));
-                //TODO: fix float points
-                pathComponents.Add(new Arc(new Point(-2 * arcRadius, meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius), new Color(), 
+                pathComponents.Add(new Arc(new PointF(-2 * arcRadius, meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius), new Color(), 
                     2 * arcRadius, 2 * arcRadius, -flameSpanAngleDegrees, flameSpanAngleDegrees));
-                pathComponents.Add(new Arc(new Point(0, meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius), new Color(),
+                pathComponents.Add(new Arc(new PointF(0, meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius), new Color(),
                     2 * arcRadius, 2 * arcRadius, 180, flameSpanAngleDegrees));
                 this.ObjectAppearance.Add(new Path(new Point(0, 0), flameSweep.Key, pathComponents));
             }

@@ -6,11 +6,11 @@ namespace QwertyCombat
 {
     public abstract class DrawableShape
     {
-        public Point Origin { get; private set; }
+        public PointF Origin { get; private set; }
         public Color Color { get; private set; }
         public bool IsTeamColor { get; private set; }
 
-        public DrawableShape(Point origin, Color color, bool isTeamColor = false)
+        public DrawableShape(PointF origin, Color color, bool isTeamColor = false)
         {
             this.Origin = origin;
             this.Color = color;
@@ -24,7 +24,7 @@ namespace QwertyCombat
     {
         public Size Size { get; private set; }
         
-        public Ellipse(Point origin, Color color, Size size, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        public Ellipse(PointF origin, Color color, Size size, bool isTeamColor = false) : base(origin, color, isTeamColor)
         {
             this.Size = size;
         }
@@ -63,7 +63,7 @@ namespace QwertyCombat
         public float StartAngle { get; private set; }
         public float SweepAngle { get; private set; }
 
-        public Arc(Point origin, Color color, float width, float height, float startAngle, float sweepAngle, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        public Arc(PointF origin, Color color, float width, float height, float startAngle, float sweepAngle, bool isTeamColor = false) : base(origin, color, isTeamColor)
         {
             this.Width = width;
             this.Height = height;
