@@ -18,19 +18,32 @@ namespace QwertyCombat.Objects
             this.ObjectCoordinates = meteorCoordinates;
             this.CollisionDamage = damage;
 
-
-
-
-
             int meteorRadius = 15;
-            int spotRadius = (int)(meteorRadius / 3.0);
+            //int spotRadius = (int)(meteorRadius / 3.0);
 
             this.ObjectAppearance = new List<DrawableShape>
             {
                 new Ellipse(new Point(-meteorRadius, -meteorRadius), Colors.DarkGray, new Size(2 * meteorRadius, 2 * meteorRadius)),
-                //TODO: add more spots, random generated
-                new Ellipse(new Point(-spotRadius, -spotRadius), Colors.DimGray, new Size(spotRadius, spotRadius))
             };
+
+            Random rand = new Random();
+            int minSpotRadius = meteorRadius / 6;
+            int maxSpotRadius = meteorRadius / 4;
+            for (int i = 0; i < 10; i++)
+            {
+                var x = rand.Next(-meteorRadius, meteorRadius);
+                var y = rand.Next(-meteorRadius, meteorRadius);
+                var spotRadius = rand.Next(minSpotRadius, maxSpotRadius + 1);
+                if (x * x + y * y < meteorRadius * meteorRadius &&
+                    (x + 2 * spotRadius) * (x + 2 * spotRadius) + y * y < meteorRadius * meteorRadius &&
+                    x * x + (y + 2 * spotRadius) * (y + 2 * spotRadius) < meteorRadius * meteorRadius &&
+                    (x + 2 * spotRadius) * (x + 2 * spotRadius) + (y + 2 * spotRadius) * (y + 2 * spotRadius) < meteorRadius * meteorRadius)
+                {
+                    //TODO: define minimal distance between spots against overflows
+                    this.ObjectAppearance.Add(new Ellipse(new Point(x, y), Colors.DimGray, new Size(2 * spotRadius, 2 * spotRadius)));
+                }
+            }
+
 
             var flameSweepsOnMeteor = new Dictionary<Color, double> { { Colors.Orange, 2 * Math.PI / 3 }, { Colors.Red, Math.PI / 4 } };
             float flameSpanAngle = (float)Math.PI / 4;
