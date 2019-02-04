@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Eto.Drawing;
 using Hex = Barbar.HexGrid;
 
@@ -19,30 +20,32 @@ namespace QwertyCombat.Objects
             this.CollisionDamage = damage;
 
             int meteorRadius = 15;
-            //int spotRadius = (int)(meteorRadius / 3.0);
 
             this.ObjectAppearance = new List<DrawableShape>
             {
                 new Ellipse(new Point(-meteorRadius, -meteorRadius), Colors.DarkGray, new Size(2 * meteorRadius, 2 * meteorRadius)),
             };
 
+            var darkSpots = new List<Ellipse>();
             Random rand = new Random();
-            int minSpotRadius = meteorRadius / 6;
-            int maxSpotRadius = meteorRadius / 4;
-            for (int i = 0; i < 10; i++)
+            int minSpotRadius = meteorRadius / 7;
+            int maxSpotRadius = meteorRadius / 5;
+            for (int i = 0; i < 20; i++)
             {
-                var x = rand.Next(-meteorRadius, meteorRadius);
-                var y = rand.Next(-meteorRadius, meteorRadius);
                 var spotRadius = rand.Next(minSpotRadius, maxSpotRadius + 1);
-                if (x * x + y * y < meteorRadius * meteorRadius &&
-                    (x + 2 * spotRadius) * (x + 2 * spotRadius) + y * y < meteorRadius * meteorRadius &&
-                    x * x + (y + 2 * spotRadius) * (y + 2 * spotRadius) < meteorRadius * meteorRadius &&
-                    (x + 2 * spotRadius) * (x + 2 * spotRadius) + (y + 2 * spotRadius) * (y + 2 * spotRadius) < meteorRadius * meteorRadius)
+
+                var r = rand.Next(spotRadius, meteorRadius - spotRadius);
+                var phi = 2 * Math.PI * rand.NextDouble();
+                int x = (int)(r * Math.Cos(phi)) - spotRadius;
+                int y = (int)(r * Math.Sin(phi)) - spotRadius;
+                
+                var spotCenter = new PointF(x + spotRadius, y + spotRadius);
+                if (!darkSpots.Any(existingSpot => spotCenter.Distance(existingSpot.Origin + existingSpot.Size / 2) < spotRadius + existingSpot.Size.Width))
                 {
-                    //TODO: define minimal distance between spots against overflows
-                    this.ObjectAppearance.Add(new Ellipse(new Point(x, y), Colors.DimGray, new Size(2 * spotRadius, 2 * spotRadius)));
+                    darkSpots.Add(new Ellipse(new Point(x, y), Colors.DimGray, new Size(2 * spotRadius, 2 * spotRadius)));
                 }
             }
+            this.ObjectAppearance.AddRange(darkSpots);
 
 
             var flameSweepsOnMeteor = new Dictionary<Color, double> { { Colors.Orange, 2 * Math.PI / 3 }, { Colors.Red, Math.PI / 4 } };
