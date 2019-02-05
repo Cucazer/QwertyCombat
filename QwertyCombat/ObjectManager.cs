@@ -68,13 +68,58 @@ namespace QwertyCombat
 
         public bool CanMoveObjectTo(SpaceObject spaceObject, Hex.OffsetCoordinates destination)
         {
-            return this.CombatMap.AreNeighbors(spaceObject.ObjectCoordinates, destination);
+            return this.PerformBFS(spaceObject.ObjectCoordinates, spaceObject.ActionsLeft).Keys.Contains(destination);
         }
 
         public List<Hex.OffsetCoordinates> GetMovementRange(Ship ship)
         {
-            var hexagonsInRange = this.CombatMap.GetAllHexagonsInRange(ship.ObjectCoordinates, ship.ActionsLeft);
-            return hexagonsInRange.Where(c => this.SpaceObjects[this.OffsetCoordinatesToIndex(c)] == null).ToList();
+            return this.PerformBFS(ship.ObjectCoordinates, ship.ActionsLeft).Keys.Skip(1).ToList();
+        }
+
+
+        public List<Hex.OffsetCoordinates> GetHexagonPath(Hex.OffsetCoordinates startHexagon, Hex.OffsetCoordinates finishHexagon)
+        {
+            var stepOriginHexagons = this.PerformBFS(startHexagon);
+            var currentHexagon = finishHexagon;
+            var path = new List<Hex.OffsetCoordinates>();
+
+            while (!currentHexagon.Equals(startHexagon))
+            {
+                path.Add(currentHexagon);
+                currentHexagon = stepOriginHexagons[currentHexagon];
+            }
+
+            path.Reverse();
+            return path;
+        }
+
+        private Dictionary<Hex.OffsetCoordinates, Hex.OffsetCoordinates> PerformBFS(Hex.OffsetCoordinates startHexagon, int maxDistance = -1)
+        {
+            var bfsQueue = new Queue<Hex.OffsetCoordinates>();
+            bfsQueue.Enqueue(startHexagon);
+            var cameFromHexagons = new Dictionary<Hex.OffsetCoordinates, Hex.OffsetCoordinates>() { { startHexagon, new Hex.OffsetCoordinates(-1, -1) } };
+            var stepsToHexagon = new Dictionary<Hex.OffsetCoordinates, int>() { { startHexagon, 0 } };
+
+            while (bfsQueue.Count > 0)
+            {
+                var currentHexagon = bfsQueue.Dequeue();
+
+                if (maxDistance >= 0 && stepsToHexagon[currentHexagon] >= maxDistance)
+                {
+                    continue;
+                }
+
+                foreach (var neighborHexagon in this.CombatMap.GetAllNeighbors(currentHexagon).Where(c => this.SpaceObjects[this.OffsetCoordinatesToIndex(c)] == null))
+                {
+                    if (!cameFromHexagons.ContainsKey(neighborHexagon))
+                    {
+                        bfsQueue.Enqueue(neighborHexagon);
+                        cameFromHexagons.Add(neighborHexagon, currentHexagon);
+                        stepsToHexagon.Add(neighborHexagon, stepsToHexagon[currentHexagon] + 1);
+                    }
+                }
+            }
+            return cameFromHexagons;
         }
 
         public List<Hex.OffsetCoordinates> GetAttackTargets(Ship ship)

@@ -85,6 +85,23 @@ namespace QwertyCombat
             return false;
         }
 
+        public List<Hex.OffsetCoordinates> GetAllNeighbors(Hex.OffsetCoordinates hexagon)
+        {
+            var neighbors = new List<Hex.OffsetCoordinates>();
+
+            for (int i = 0; i < 6; i++)
+            {
+                var potentialNeighbor = this.HexGrid.ToOffsetCoordinates(Hex.CubeCoordinates.Neighbor(this.HexGrid.ToCubeCoordinates(hexagon), i));
+                if (potentialNeighbor.Column >= 0 && potentialNeighbor.Column < this.FieldWidth &&
+                    potentialNeighbor.Row >= 0 && potentialNeighbor.Row < this.FieldHeight)
+                {
+                    neighbors.Add(potentialNeighbor);
+                }
+            }
+
+            return neighbors;
+        }
+
         public PointF[] GetHexagonCorners(int x, int y)
         {
             return this.GetHexagonCorners(new Hex.OffsetCoordinates(x, y));

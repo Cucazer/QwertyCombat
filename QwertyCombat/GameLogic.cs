@@ -133,13 +133,22 @@ namespace QwertyCombat
         {
             if (this.activeShip.ActionsLeft <= 0 || !this.objectManager.CanMoveObjectTo(this.activeShip, clickedHexagon)) return;
 
-            var rotateAngle = this.objectManager.GetRelativeHexagonAngle(this.activeShip, clickedHexagon);
-            this.objectManager.RotateObject(this.activeShip, rotateAngle);
+            double currentAngle = 0;
+            foreach (var nextHexagon in this.objectManager.GetHexagonPath(this.activeShip.ObjectCoordinates, clickedHexagon))
+            {
+                var nextStepAngle = Math.Round(this.objectManager.GetRelativeHexagonAngle(this.activeShip, nextHexagon), 2);
+                var rotateAngle = nextStepAngle - currentAngle;
+                currentAngle = nextStepAngle;
+                if (rotateAngle != 0)
+                {
+                    this.objectManager.RotateObject(this.activeShip, rotateAngle);
+                }
 
-            this.objectManager.MoveObjectTo(this.activeShip, clickedHexagon);
-            this.activeShip.ActionsLeft--;
-
-            this.objectManager.RotateObject(this.activeShip, -rotateAngle);
+                this.objectManager.MoveObjectTo(this.activeShip, nextHexagon);
+                this.activeShip.ActionsLeft--;
+            }
+            // restore initial facing direction
+            this.objectManager.RotateObject(this.activeShip, -currentAngle);
 
             if (this.activeShip.ActionsLeft == 0)
             {
