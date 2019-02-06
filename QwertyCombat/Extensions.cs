@@ -1,4 +1,6 @@
-﻿namespace QwertyCombat
+﻿using System;
+
+namespace QwertyCombat
 {
     public static class Extensions
     {
@@ -20,6 +22,16 @@
         public static Barbar.HexGrid.Point ConvertToHexPoint(this Eto.Drawing.PointF drawingPointF)
         {
             return new Barbar.HexGrid.Point(drawingPointF.X, drawingPointF.Y);
+        }
+
+        public static double ToRadians(this double angleInDegrees)
+        {
+            return angleInDegrees * Math.PI / 180;
+        }
+
+        public static double ToDegrees(this double angleInRadians)
+        {
+            return angleInRadians * 180 / Math.PI;
         }
     }
 }
