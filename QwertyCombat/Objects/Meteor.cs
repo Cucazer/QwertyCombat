@@ -49,23 +49,23 @@ namespace QwertyCombat.Objects
 
 
             var flameSweepsOnMeteor = new Dictionary<Color, double> { { Colors.Orange, 2 * Math.PI / 3 }, { Colors.Red, Math.PI / 4 } };
-            float flameSpanAngle = (float)Math.PI / 4;
-            float flameSpanAngleDegrees = (float)(flameSpanAngle * 180 / Math.PI);
+            var flameSpanAngle = Math.PI / 4;
 
             foreach (var flameSweep in flameSweepsOnMeteor)
             {
                 float flameBaseLengthHalf = meteorRadius * (float)Math.Sin(flameSweep.Value / 2);
                 float flameHeight = flameBaseLengthHalf / (float)Math.Tan(flameSpanAngle / 2);
+                float flameTipOffset = meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight;
                 // arcSpanAngle = 180 - 2 * (90 - flameSpanAngle/2) = 180 - 180 + 2 * flameSpanAngle/2 = flameSpanAngle
                 float arcRadius = flameHeight / (float)Math.Sin(flameSpanAngle);
 
                 var pathComponents = new List<DrawableShape>();
                 pathComponents.Add(new Arc(new Point(- meteorRadius, - meteorRadius), new Color(),
-                    2 * meteorRadius, 2 * meteorRadius, 90 - (float)(flameSweep.Value / 2 * 180 / Math.PI), (float)(flameSweep.Value * 180 / Math.PI)));
-                pathComponents.Add(new Arc(new PointF(-2 * arcRadius, meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius), new Color(), 
-                    2 * arcRadius, 2 * arcRadius, -flameSpanAngleDegrees, flameSpanAngleDegrees));
-                pathComponents.Add(new Arc(new PointF(0, meteorRadius * (float)Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius), new Color(),
-                    2 * arcRadius, 2 * arcRadius, 180, flameSpanAngleDegrees));
+                    2 * meteorRadius, 2 * meteorRadius, 180 - (float)(flameSweep.Value.ToDegrees() / 2), (float)flameSweep.Value.ToDegrees()));
+                pathComponents.Add(new Arc(new PointF(-flameTipOffset - arcRadius, -2 * arcRadius), new Color(), 
+                    2 * arcRadius, 2 * arcRadius, 90 - (float)flameSpanAngle.ToDegrees(), (float)flameSpanAngle.ToDegrees()));
+                pathComponents.Add(new Arc(new PointF(-flameTipOffset - arcRadius, 0), new Color(),
+                    2 * arcRadius, 2 * arcRadius, -90, (float)flameSpanAngle.ToDegrees()));
                 this.ObjectAppearance.Add(new Path(new Point(0, 0), flameSweep.Key, pathComponents));
             }
         }
