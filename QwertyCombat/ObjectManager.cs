@@ -205,7 +205,11 @@ namespace QwertyCombat
             var meteorHealth = rand.Next(1, 150);
             var meteorDmg = meteorHealth / 4;
 
-            this.AddObject(new Meteor(meteorCoordinates, meteorHealth, meteorDmg, movementDirection));
+            var meteor = new Meteor(meteorCoordinates, meteorHealth, meteorDmg, movementDirection);
+            var headingAngle = this.CombatMap.GetAngle(meteorCoordinates,
+                this.CombatMap.GetNeighborCoordinates(meteorCoordinates, (int) movementDirection));
+            meteor.Rotate(headingAngle);
+            this.AddObject(meteor);
         }
 
         public double GetRelativeHexagonAngle(SpaceObject sourceSpaceObject, Hex.OffsetCoordinates targetOffsetCoordinates)
