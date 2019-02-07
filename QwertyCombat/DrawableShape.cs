@@ -6,7 +6,7 @@ namespace QwertyCombat
 {
     public abstract class DrawableShape
     {
-        public PointF Origin { get; private set; }
+        public PointF Origin { get; protected set; }
         public Color Color { get; private set; }
         public bool IsTeamColor { get; private set; }
 
@@ -17,21 +17,27 @@ namespace QwertyCombat
             this.IsTeamColor = isTeamColor;
         }
 
-        public abstract void Rotate(double angle);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="angle">Angle in degrees</param>
+        public abstract void Rotate(float angle);
     }
 
     public class Ellipse : DrawableShape
     {
-        public Size Size { get; private set; }
+        public SizeF Size { get; private set; }
         
-        public Ellipse(PointF origin, Color color, Size size, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        public Ellipse(PointF origin, Color color, SizeF size, bool isTeamColor = false) : base(origin, color, isTeamColor)
         {
             this.Size = size;
         }
 
-        public override void Rotate(double angle)
+        public override void Rotate(float angle)
         {
-            throw new System.NotImplementedException();
+            var arcCenter = this.Origin + this.Size / 2;
+            arcCenter.Rotate(angle);
+            this.Origin = arcCenter - this.Size / 2;
         }
     }
 
@@ -45,35 +51,32 @@ namespace QwertyCombat
         }
 
 
-        public override void Rotate(double angle)
+        public override void Rotate(float angle)
         {
             for (int i = 0; i < this.Points.Count; i++)
             {
                 var rotatedPoint = new PointF((SizeF)this.Points[i]);
-                rotatedPoint.Rotate((float)angle);
+                rotatedPoint.Rotate(angle);
                 this.Points[i] = rotatedPoint;
             }
         }
     }
 
-    public class Arc : DrawableShape
+    public class Arc : Ellipse
     {
-        public float Width { get; private set; }
-        public float Height { get; private set; }
         public float StartAngle { get; private set; }
         public float SweepAngle { get; private set; }
 
-        public Arc(PointF origin, Color color, float width, float height, float startAngle, float sweepAngle, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        public Arc(PointF origin, Color color, SizeF size, float startAngle, float sweepAngle, bool isTeamColor = false) : base(origin, color, size, isTeamColor)
         {
-            this.Width = width;
-            this.Height = height;
             this.StartAngle = startAngle;
             this.SweepAngle = sweepAngle;
         }
 
-        public override void Rotate(double angle)
+        public override void Rotate(float angle)
         {
-            throw new NotImplementedException();
+            base.Rotate(angle);
+            this.StartAngle += angle;
         }
     }
 
@@ -87,7 +90,7 @@ namespace QwertyCombat
         }
 
 
-        public override void Rotate(double angle)
+        public override void Rotate(float angle)
         {
             foreach (var component in this.Components)
             {

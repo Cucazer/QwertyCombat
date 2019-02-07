@@ -59,13 +59,21 @@ namespace QwertyCombat.Objects
                 // arcSpanAngle = 180 - 2 * (90 - flameSpanAngle/2) = 180 - 180 + 2 * flameSpanAngle/2 = flameSpanAngle
                 float arcRadius = flameHeight / (float)Math.Sin(flameSpanAngle);
 
-                var pathComponents = new List<DrawableShape>();
-                pathComponents.Add(new Arc(new Point(- meteorRadius, - meteorRadius), new Color(),
-                    2 * meteorRadius, 2 * meteorRadius, 180 - (float)(flameSweep.Value.ToDegrees() / 2), (float)flameSweep.Value.ToDegrees()));
-                pathComponents.Add(new Arc(new PointF(-flameTipOffset - arcRadius, -2 * arcRadius), new Color(), 
-                    2 * arcRadius, 2 * arcRadius, 90 - (float)flameSpanAngle.ToDegrees(), (float)flameSpanAngle.ToDegrees()));
-                pathComponents.Add(new Arc(new PointF(-flameTipOffset - arcRadius, 0), new Color(),
-                    2 * arcRadius, 2 * arcRadius, -90, (float)flameSpanAngle.ToDegrees()));
+                var pathComponents = new List<DrawableShape>
+                {
+                    new Arc(new Point(-meteorRadius, -meteorRadius), new Color(),
+                        new SizeF(2 * meteorRadius, 2 * meteorRadius),
+                        180 - (float) (flameSweep.Value.ToDegrees() / 2),
+                        (float) flameSweep.Value.ToDegrees()),
+                    new Arc(new PointF(-flameTipOffset - arcRadius, -2 * arcRadius), new Color(),
+                        new SizeF(2 * arcRadius, 2 * arcRadius),
+                        90 - (float) flameSpanAngle.ToDegrees(),
+                        (float) flameSpanAngle.ToDegrees()),
+                    new Arc(new PointF(-flameTipOffset - arcRadius, 0), new Color(),
+                        new SizeF(2 * arcRadius, 2 * arcRadius),
+                        -90,
+                        (float) flameSpanAngle.ToDegrees())
+                };
                 this.ObjectAppearance.Add(new Path(new Point(0, 0), flameSweep.Key, pathComponents));
             }
         }
@@ -76,7 +84,10 @@ namespace QwertyCombat.Objects
 
         public override void Rotate(double angle)
         {
-            throw new System.NotImplementedException();
+            foreach (var shape in this.ObjectAppearance)
+            {
+                shape.Rotate((float)angle);
+            }
         }
     }
 }

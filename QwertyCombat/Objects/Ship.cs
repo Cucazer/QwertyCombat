@@ -48,7 +48,7 @@ namespace QwertyCombat.Objects
         {
             foreach (var shape in this.ObjectAppearance)
             {
-                shape.Rotate(angle);
+                shape.Rotate((float)angle);
             }
             this.WeaponPoint.Rotate((float)angle);
         }
