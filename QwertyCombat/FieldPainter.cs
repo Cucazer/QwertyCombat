@@ -258,7 +258,6 @@ namespace QwertyCombat
 
         private void DrawMeteor(Meteor meteor, Point meteorCoordinates)
         {
-            var meteorRadius = 15;
             foreach (var shape in meteor.ObjectAppearance)
             {
                 this.DrawShape(shape, new Color(), meteorCoordinates);
@@ -266,55 +265,7 @@ namespace QwertyCombat
 
             using (var g = new Graphics(this.CurrentBitmap))
             {
-
-                //g.FillEllipse(Colors.DarkGray,
-                //    new Rectangle(meteorCoordinates - meteorRadius, new Size(2 * meteorRadius, 2 * meteorRadius)));
-                // TODO: add dark spots
-                //int spotRadius = (int)(meteorRadius / 3.0);
-                //g.FillEllipse(Colors.DimGray, new Rectangle(meteorCoordinates - spotRadius, new Size(spotRadius, spotRadius)));
-
                 g.DrawText(Fonts.Sans(8), Brushes.Red, meteorCoordinates + new Size(5, -25), meteor.CurrentHealth.ToString());
-                // TODO: better indicate meteor's way
-                var directionAngle = 60 * (int)meteor.MovementDirection - 30;
-                var directionAngleRadians = (float)directionAngle / 180 * Math.PI;
-                var beamStartAngles = new List<double>
-                {
-                    //directionAngleRadians + Math.PI / 2,
-                    //directionAngleRadians + 5 * Math.PI / 6,
-                    //directionAngleRadians + 7 * Math.PI / 8,
-                    directionAngleRadians + Math.PI,
-                    //directionAngleRadians + 9 * Math.PI / 8,
-                    //directionAngleRadians + 7 * Math.PI / 6,
-                    //directionAngleRadians + 3 * Math.PI / 2
-                };
-                foreach (var beamStartAngle in beamStartAngles)
-                {
-                    var beamStartPoint = new Point((int)(meteorRadius * Math.Cos(beamStartAngle)),
-                        (int)(-meteorRadius * Math.Sin(beamStartAngle)));
-                    var beamEndPoint = beamStartPoint + new Size((int)(-20 * Math.Cos(directionAngleRadians)), (int)(20 * Math.Sin(directionAngleRadians)));
-                    g.DrawLine(new Pen(Colors.Yellow, 2), meteorCoordinates + beamStartPoint, meteorCoordinates + beamEndPoint);
-                }
-
-                var flameSweepsOnMeteor = new Dictionary<Color, double> { { Colors.Orange, 2 * Math.PI / 3 }, { Colors.Red, Math.PI / 4 } };
-                float flameSpanAngle  = (float)Math.PI / 4;
-                float flameSpanAngleDegrees = (float)(flameSpanAngle * 180 / Math.PI);
-
-                //foreach (var flameSweep in flameSweepsOnMeteor)
-                //{
-                //    float flameBaseLengthHalf = meteorRadius * (float)Math.Sin(flameSweep.Value / 2);
-                //    float flameHeight = flameBaseLengthHalf / (float)Math.Tan(flameSpanAngle / 2);
-                //    // arcSpanAngle = 180 - 2 * (90 - flameSpanAngle/2) = 180 - 180 + 2 * flameSpanAngle/2 = flameSpanAngle
-                //    float arcRadius = flameHeight / (float) Math.Sin(flameSpanAngle);
-                    
-                //    var path = new GraphicsPath();
-                //    path.AddArc(meteorCoordinates.X - meteorRadius, meteorCoordinates.Y - meteorRadius,
-                //        2 * meteorRadius, 2 * meteorRadius, 90 - (float)(flameSweep.Value/2 * 180 / Math.PI), (float)(flameSweep.Value * 180 / Math.PI));
-                //    path.AddArc(meteorCoordinates.X - 2 * arcRadius, meteorCoordinates.Y + meteorRadius * (float) Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius,
-                //        2 * arcRadius, 2 * arcRadius, -flameSpanAngleDegrees, flameSpanAngleDegrees);
-                //    path.AddArc(meteorCoordinates.X, meteorCoordinates.Y + meteorRadius * (float) Math.Cos(flameSweep.Value / 2) + flameHeight - arcRadius,
-                //        2 * arcRadius, 2 * arcRadius, 180, flameSpanAngleDegrees);
-                //    g.FillPath(flameSweep.Key, path);
-                //}
             }
         }
 
@@ -382,7 +333,7 @@ namespace QwertyCombat
                     switch (component)
                     {
                         case Arc a:
-                            graphicsPath.AddArc(new RectangleF(a.Origin + offset, new SizeF(a.Width, a.Height)), a.StartAngle, a.SweepAngle);
+                            graphicsPath.AddArc(new RectangleF(a.Origin + offset, a.Size), a.StartAngle, a.SweepAngle);
                             break;
                         default:
                             throw new ArgumentException($"Adding of {component.GetType()} to graphics path not supported");
