@@ -1,6 +1,7 @@
 using System;
 using Eto.Forms;
 using Eto.Drawing;
+//using Eto.WinForms;
 
 namespace QwertyCombat
 {
@@ -9,7 +10,7 @@ namespace QwertyCombat
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			new Application().Run(new MainForm());
+			new Application(/*new Platform() - force WinForms instead of WPF*/).Run(new MainForm());
 		}
 	}
 }
