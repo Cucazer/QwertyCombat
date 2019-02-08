@@ -78,9 +78,13 @@ namespace QwertyCombat.Objects
             }
         }
 
-        public override string Description => ObjectDescription + "\nCollision damage: " + this.CollisionDamage
-                                              + "\nHP - " + this.CurrentHealth
-                                              + "\nMovement direction: \n" + this.MovementDirection;
+        public override Dictionary<string, string> Properties => new Dictionary<string, string>
+        {
+            {"Name", ObjectDescription},
+            {"Collision damage", $"{this.CollisionDamage}"},
+            {"HP", $"{this.CurrentHealth}"},
+            {"Movement direction", $"{this.MovementDirection}"}
+        };
 
         public override void Rotate(double angle)
         {

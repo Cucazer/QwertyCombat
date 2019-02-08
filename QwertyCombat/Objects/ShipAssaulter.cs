@@ -9,12 +9,14 @@ namespace QwertyCombat.Objects
     {
         private const string StaticDescription = "Heavy Assaulter ship";
 
-        public override string Description =>
-            $"{StaticDescription}{Environment.NewLine}" +
-            $"HP - {this.CurrentHealth}/{this.MaxHealth}{Environment.NewLine}" +
-            $"Actions in this turn - {this.ActionsLeft}/{MaxActions}{Environment.NewLine}" +
-            $"Attack damage - {this.EquippedWeapon.AttackPower}{Environment.NewLine}" +
-            $"Attack range - {this.EquippedWeapon.AttackRange}";
+        public override Dictionary<string, string> Properties => new Dictionary<string, string>
+        {
+            {"Name", StaticDescription},
+            {"HP", $"{this.CurrentHealth}/{this.MaxHealth}"},
+            {"Actions in this turn", $"{this.ActionsLeft}/{this.MaxActions}"},
+            {"Attack damage", $"{this.EquippedWeapon.AttackPower}"},
+            {"Attack range", $"{this.EquippedWeapon.AttackRange}"}
+        };
 
         public ShipAssaulter(Player playerId, WeaponType weaponType) : base(playerId, weaponType, 100, 2)
         {

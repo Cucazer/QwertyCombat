@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Eto.Drawing;
 using QwertyCombat.Objects.Weapons;
 
@@ -32,7 +33,13 @@ namespace QwertyCombat.Objects
             }
         }
 
-        public override string Description => "";
+        public override Dictionary<string, string> Properties => new Dictionary<string, string>
+        {
+            {"HP", $"{this.CurrentHealth}/{this.MaxHealth}"},
+            {"Actions in this turn", $"{this.ActionsLeft}/{this.MaxActions}"},
+            {"Attack damage", $"{this.EquippedWeapon.AttackPower}"},
+            {"Attack range", $"{this.EquippedWeapon.AttackRange}"}
+        };
 
         public int AttackDamage 
         {

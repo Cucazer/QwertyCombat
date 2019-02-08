@@ -16,7 +16,7 @@ namespace QwertyCombat
             set { this.objectManager.ActiveShip = value; }
         }
 
-        public string ActiveShipDescription => this.activeShip?.Description ?? "";
+        public string ActiveShipDescription => this.activeShip?.Properties ?? "";
         public string ActivePlayerDescription
         {
             get
@@ -105,7 +105,7 @@ namespace QwertyCombat
                 return null;
             }
 
-            return hoveredObject?.Description ?? null;
+            return hoveredObject?.Properties ?? null;
         }
 
         private void ActiveShipAttack(SpaceObject enemyObject)
