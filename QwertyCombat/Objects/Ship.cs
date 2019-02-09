@@ -10,7 +10,7 @@ namespace QwertyCombat.Objects
         Scout, Assaulter
     }
 
-    class Ship : SpaceObject
+    public abstract class Ship : SpaceObject
     {
         public readonly Weapon EquippedWeapon;
         public PointF WeaponPoint;
@@ -35,8 +35,9 @@ namespace QwertyCombat.Objects
 
         public override Dictionary<string, string> Properties => new Dictionary<string, string>
         {
+            {"", this.Name},
             {"HP", $"{this.CurrentHealth}/{this.MaxHealth}"},
-            {"Actions in this turn", $"{this.ActionsLeft}/{this.MaxActions}"},
+            {"Actions left", $"{this.ActionsLeft}/{this.MaxActions}"},
             {"Attack damage", $"{this.EquippedWeapon.AttackPower}"},
             {"Attack range", $"{this.EquippedWeapon.AttackRange}"}
         };

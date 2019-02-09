@@ -134,7 +134,6 @@ namespace QwertyCombat
             this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
             // unfortunately there is no Refresh method in Eto.Forms and Invalidate doesn't work as intended, but reassigning image to updated bitmap does the trick :)
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
-            this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
             this.UpdateShipCount();
         }
 
@@ -143,7 +142,7 @@ namespace QwertyCombat
             var objectDescription = this.gameLogic.HandleFieldHover((Point)e.Location);
             if (objectDescription != null)
             {
-                this.fieldPainter.ActivateTooltip((Point)e.Location, objectDescription);
+                this.fieldPainter.ActivateObjectTooltip((Point)e.Location, objectDescription);
             }
             else
             {
@@ -156,7 +155,6 @@ namespace QwertyCombat
             this.gameLogic.EndTurn();
             this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
-            this.labelObjectDescription.Text = this.gameLogic.ActiveShipDescription;
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
         }

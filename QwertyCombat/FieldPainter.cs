@@ -196,7 +196,7 @@ namespace QwertyCombat
         }
 
         bool tooltipShown = false;
-        public void ActivateTooltip(Point location, string text)
+        public void ActivateObjectTooltip(Point location, Dictionary<string, string> objectProperties)
         {
             if (this.performingAnimation)
             { 
@@ -204,7 +204,7 @@ namespace QwertyCombat
             }
             this.tooltipShown = true;
             this.DrawField();
-            // extract to DrawTooltip?
+            //TODO: extract to DrawTooltip?
             var textBoxSize = new Size(120, 70);
             var textBoxLocation = location + new Size(10, 5);
             if (!this.CurrentBitmap.Size.Contains(location + textBoxSize))
@@ -215,7 +215,11 @@ namespace QwertyCombat
             {
                 g.FillRectangle(Colors.Black, new Rectangle(textBoxLocation, textBoxSize));
                 g.DrawRectangle(Colors.Red, new Rectangle(textBoxLocation, textBoxSize));
-                g.DrawText(Fonts.Sans(7), Colors.Lime, textBoxLocation + new Size(5, 5), text);
+                var lineIndex = 0;
+                foreach (var property in objectProperties)
+                {
+                    g.DrawText(Fonts.Sans(7), Colors.Lime, textBoxLocation + new Size(5, 5 + 12 * lineIndex++), $"{property.Key}...{property.Value}");
+                }
             }
             this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
         }

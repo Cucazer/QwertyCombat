@@ -13,9 +13,6 @@ namespace QwertyCombat.Objects
 
     public abstract class SpaceObject: ICloneable
     {
-        //TODO: implement overridable name, use as tooltip caption
-        //public abstract static string Name;
-
         public readonly int MaxActions;
 
         public readonly int MaxHealth;
@@ -40,6 +37,7 @@ namespace QwertyCombat.Objects
         public int ActionsLeft { get; set; }
         public int CurrentHealth { get; set; }
         public OffsetCoordinates ObjectCoordinates { get; set; }
+        public abstract string Name { get; }
         public abstract Dictionary<string, string> Properties { get; }
         public bool IsMoving { get; set; }
 

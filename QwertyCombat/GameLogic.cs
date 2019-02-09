@@ -16,7 +16,6 @@ namespace QwertyCombat
             set { this.objectManager.ActiveShip = value; }
         }
 
-        public string ActiveShipDescription => this.activeShip?.Properties ?? "";
         public string ActivePlayerDescription
         {
             get
@@ -90,13 +89,11 @@ namespace QwertyCombat
             }
         }
 
-        public string HandleFieldHover(Point moveLocation)
+        public Dictionary<string, string> HandleFieldHover(Point moveLocation)
         {
-            //OffsetCoordinates clickedHexagon;
             SpaceObject hoveredObject;
             try
             {
-                //clickedHexagon = this.objectManager.PixelToOffsetCoordinates(clickLocation);
                 hoveredObject = this.objectManager.PixelToSpaceObject(moveLocation);
             }
             catch (ArgumentOutOfRangeException)

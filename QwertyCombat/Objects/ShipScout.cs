@@ -8,16 +8,7 @@ namespace QwertyCombat.Objects
 {
     class ShipScout : Ship
     {
-        private const string ObjectDescription = "Light Scout ship";
-
-        public override Dictionary<string, string> Properties => new Dictionary<string, string>
-        {
-            {"Name", ObjectDescription},
-            {"HP", $"{this.CurrentHealth}/{this.MaxHealth}"},
-            {"Actions in this turn", $"{this.ActionsLeft}/{this.MaxActions}"},
-            {"Attack damage", $"{this.EquippedWeapon.AttackPower}"},
-            {"Attack range", $"{this.EquippedWeapon.AttackRange}"}
-        };
+        public override string Name => "Light Scout ship";
 
         public ShipScout(Player playerId, WeaponType weaponType) : base(playerId, weaponType, 50, 3)
         {

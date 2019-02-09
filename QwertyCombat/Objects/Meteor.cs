@@ -9,7 +9,7 @@ namespace QwertyCombat.Objects
     // TODO: rename to meteoroid? meteor is already in atmosphere!
     class Meteor : SpaceObject
     {
-        private const string ObjectDescription = "Moving meteor";
+        public override string Name => "Moving meteor";
         public readonly int CollisionDamage;
         public readonly HexagonNeighborDirection MovementDirection;
 
@@ -80,7 +80,7 @@ namespace QwertyCombat.Objects
 
         public override Dictionary<string, string> Properties => new Dictionary<string, string>
         {
-            {"Name", ObjectDescription},
+            {"", this.Name},
             {"Collision damage", $"{this.CollisionDamage}"},
             {"HP", $"{this.CurrentHealth}"},
             {"Movement direction", $"{this.MovementDirection}"}
