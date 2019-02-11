@@ -50,13 +50,17 @@ namespace QwertyCombat.Objects
                 new PointF(-20, 22)
             };
 
-            this.WeaponPoint = new PointF(23, 0);
+            this.WeaponPoint = new PointF(weaponPoints[1].X, 0);
 
-            this.ObjectAppearance = new List<DrawableShape> { new Polygon(new Point(0,0), new Color() , polygonPoints, true),
-                                                                new Polygon(new Point(0,0), Colors.Aqua, windowPoints),
-                                                                new Polygon(new Point(0,0), Colors.LightGrey, weaponPoints),
-                                                                new Polygon(new Point(0,0), Colors.DarkSeaGreen, nozzlePoints),
-                                                                new Polygon(new Point(0,0), Colors.DarkSeaGreen, nozzlePoints.Select(p => new PointF(p.X, -p.Y)).ToList()) };
+            this.ObjectAppearance = new List<DrawableShape>
+            {
+                new Polygon(new Point(0, 0), new Color(), polygonPoints, true),
+                new Polygon(new Point(0, 0), Colors.Aqua, windowPoints),
+                new Polygon(new Point(0, 0), Colors.LightGrey, weaponPoints),
+                new Polygon(new Point(0, 0), Colors.DarkSeaGreen, nozzlePoints),
+                new Polygon(new Point(0, 0), Colors.DarkSeaGreen,
+                    nozzlePoints.Select(p => new PointF(p.X, -p.Y)).ToList())
+            };
 
             if (this.Owner == Player.SecondPlayer)
             {

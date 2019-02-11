@@ -81,22 +81,22 @@ namespace QwertyCombat
         {
             if (animationToPerform != null)
             {
-                AnimationQueue.Enqueue(animationToPerform);
+                this.AnimationQueue.Enqueue(animationToPerform);
             }
 
-            if (performingAnimation)
+            if (this.performingAnimation)
             {
                 return;
             }
 
-            if (!AnimationQueue.Any())
+            if (!this.AnimationQueue.Any())
             {
                 this.DrawField();
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 return;
             }
 
-            var nextAnimation = AnimationQueue.Dequeue();
+            var nextAnimation = this.AnimationQueue.Dequeue();
             this.gameStateToDraw = nextAnimation.CurrentGameState;
             switch (nextAnimation.AnimationType)
             {
@@ -116,6 +116,12 @@ namespace QwertyCombat
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public void DrawGameScene()
+        {
+            // draw (call to draw) game relevant UI - ships left bars, End turn and Sound on/off buttons
+            // call to draw game field itself, with according offset
         }
 
         public void DrawField()
@@ -296,6 +302,9 @@ namespace QwertyCombat
         {
             switch (shape)
             {
+                case Arc a:
+                    this.DrawArc(a, teamColor, offset);
+                    break;
                 case Ellipse e:
                     this.DrawEllipse(e, teamColor, offset);
                     break;
@@ -307,6 +316,16 @@ namespace QwertyCombat
                     break;
                 default:
                     throw new ArgumentException($"Drawing of {shape.GetType()} not supported");
+            }
+        }
+
+        private void DrawArc(Arc arc, Color teamColor, Point offset)
+        {
+            //TODO: fill vs thickness
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                g.FillPie(arc.IsTeamColor ? teamColor : arc.Color, new RectangleF(arc.Origin + offset, arc.Size),
+                    arc.StartAngle, arc.SweepAngle);
             }
         }
 
