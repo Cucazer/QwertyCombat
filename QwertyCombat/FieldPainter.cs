@@ -51,7 +51,7 @@ namespace QwertyCombat
             
             if (animationToPerform == null)
             {
-                this.DrawField();
+                this.DrawGameScene();
                 return;
             }
 
@@ -91,7 +91,7 @@ namespace QwertyCombat
 
             if (!this.AnimationQueue.Any())
             {
-                this.DrawField();
+                this.DrawGameScene();
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 return;
             }
@@ -120,11 +120,56 @@ namespace QwertyCombat
 
         public void DrawGameScene()
         {
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                g.Clear(Colors.Black);
+            }
+
             // draw (call to draw) game relevant UI - ships left bars, End turn and Sound on/off buttons
+            var shipsAliveBarPoints = new List<PointF>
+            {
+                new PointF(0,0),
+                new PointF(100,0),
+                new PointF(110, 10),
+                new PointF(100, 20),
+                new PointF(0, 20)
+            };
+            var redShipsAliveBar = new Polygon(Point.Empty, Colors.Red, shipsAliveBarPoints);
+            var blueShipsAliveBar = new Polygon(Point.Empty, Colors.Blue, shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y)).ToList());
+            this.DrawPolygon(redShipsAliveBar, Colors.Red, new Point(this.CurrentBitmap.Width / 2, 10));
+            this.DrawPolygon(blueShipsAliveBar, Colors.Red, new Point(this.CurrentBitmap.Width / 2, 10));
+
+            var endTurnButtonPoints = new List<PointF>
+            {
+                new PointF(-50, 0),
+                new PointF(50, 0),
+                new PointF(35, 15),
+                new PointF(-35, 15)
+            };
+
+            var activeTeamPen = new Pen(Colors.Yellow,5);
+            var inactiveTeamPen = new Pen(Colors.Purple, 2);
+            // TODO: make active team accessible
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                g.DrawPolygon(inactiveTeamPen, shipsAliveBarPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
+                g.DrawPolygon(activeTeamPen, shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y)).Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
+                //g.DrawLine(new Pen(Colors.Purple,4), new Point(this.CurrentBitmap.Width / 2, 10), new Point(this.CurrentBitmap.Width / 2, 30));
+                g.DrawPolygon(Colors.Purple, endTurnButtonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 30)).ToArray());
+                g.DrawText(Fonts.Monospace(10), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 30, 30), "End turn");
+            }
+
             // call to draw game field itself, with according offset
+
+            //this.DrawGameField();
+            //this.DrawGameObjects();
+
+#if DEBUG
+            //this.DisplayCellCoordinates();
+#endif
         }
 
-        public void DrawField()
+        public void DrawGameField()
         {
             // should always ensure .Dispose() is called when you are done with a Graphics object
             using (var g = new Graphics(this.CurrentBitmap))
@@ -166,7 +211,10 @@ namespace QwertyCombat
                                                               this.gameStateToDraw.ActiveShip.ObjectCoordinates.Row));
                 }
             }
+        }
 
+        private void DrawGameObjects()
+        {
             foreach (var ship in this.gameStateToDraw.Ships)
             {
                 if (!ship.IsMoving)
@@ -182,8 +230,10 @@ namespace QwertyCombat
                     this.DrawMeteor(meteor);
                 }
             }
+        }
 
-#if DEBUG
+        private void DisplayCellCoordinates()
+        {
             using (var g = new Graphics(this.CurrentBitmap))
             {
                 // draw hexagon coordinates
@@ -191,14 +241,16 @@ namespace QwertyCombat
                 {
                     for (int y = 0; y < this.combatMap.FieldHeight; y++)
                     {
-                        g.DrawText(Fonts.Monospace(7), Brushes.DeepSkyBlue, this.combatMap.GetHexagonCorners(x, y)[2], $"C{x}R{y}");
+                        g.DrawText(Fonts.Monospace(7), Brushes.DeepSkyBlue, this.combatMap.GetHexagonCorners(x, y)[2],
+                            $"C{x}R{y}");
 
                         var cubeCoordinates = this.combatMap.HexGrid.ToCubeCoordinates(new OffsetCoordinates(x, y));
-                        g.DrawText(Fonts.Monospace(7), Brushes.DeepSkyBlue, this.combatMap.GetHexagonCorners(x, y)[4] + new Size(0, -12), $"Q{cubeCoordinates.Q}R{cubeCoordinates.R}S{cubeCoordinates.S}");
+                        g.DrawText(Fonts.Monospace(7), Brushes.DeepSkyBlue,
+                            this.combatMap.GetHexagonCorners(x, y)[4] + new Size(0, -12),
+                            $"Q{cubeCoordinates.Q}R{cubeCoordinates.R}S{cubeCoordinates.S}");
                     }
                 }
             }
-#endif
         }
 
         bool tooltipShown = false;
@@ -209,7 +261,7 @@ namespace QwertyCombat
                 return;
             }
             this.tooltipShown = true;
-            this.DrawField();
+            this.DrawGameScene();
             //TODO: extract to DrawTooltip?
             var textBoxSize = new Size(120, 70);
             var textBoxLocation = location + new Size(10, 5);
@@ -234,7 +286,7 @@ namespace QwertyCombat
         {
             if (this.tooltipShown)
             {
-                this.DrawField();
+                this.DrawGameScene();
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 this.tooltipShown = false;
             }
@@ -247,18 +299,17 @@ namespace QwertyCombat
 
         private void DrawSpaceObject(SpaceObject spaceObject, Point spaceObjectCoordinates)
         {
-            if (spaceObject is Meteor)
+            switch (spaceObject)
             {
-                this.DrawMeteor((Meteor) spaceObject, spaceObjectCoordinates);
-                return;
+                case Ship s:
+                    this.DrawShip(s, spaceObjectCoordinates);
+                    break;
+                case Meteor m:
+                    this.DrawMeteor(m, spaceObjectCoordinates);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"Drawing of {spaceObject.GetType()} not supported");
             }
-            if (spaceObject is Ship)
-            {
-                this.DrawShip((Ship) spaceObject, spaceObjectCoordinates);
-                return;
-            }
-
-            throw new ArgumentException($"Drawing of {spaceObject.GetType()} not supported");
         }
 
         private void DrawMeteor(Meteor meteor)
@@ -387,7 +438,7 @@ namespace QwertyCombat
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
                 currentCoordinates += stepDifference;
-                this.DrawField();
+                this.DrawGameScene();
                 this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates));
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 if (++steps >= 10)
@@ -408,7 +459,7 @@ namespace QwertyCombat
             var animationTimer = new UITimer { Interval = defaultTimerInterval };
             var overlaySpriteIndex = 0;
             animationTimer.Elapsed += delegate {
-                this.DrawField();
+                this.DrawGameScene();
                 using (var g = new Graphics(this.CurrentBitmap))
                 {
                     g.DrawImage(pendingAnimationOverlaySprites[overlaySpriteIndex], 0, 0);
@@ -440,7 +491,7 @@ namespace QwertyCombat
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
                 spaceObjectToAnimate.Rotate(dAngle);
-                this.DrawField();
+                this.DrawGameScene();
                 this.DrawSpaceObject(spaceObjectToAnimate);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 if (++steps >= totalStepCount)
@@ -469,7 +520,7 @@ namespace QwertyCombat
             var steps = 0;
 
             animationTimer.Elapsed += delegate {
-                this.DrawField();
+                this.DrawGameScene();
                 
                 var currentExplosionRadius = explosionRadius * (steps + 1) / (float)totalStepCount;
                 using (var g = new Graphics(this.CurrentBitmap))

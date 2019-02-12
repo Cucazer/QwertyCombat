@@ -100,7 +100,7 @@ namespace QwertyCombat
             ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
-            this.fieldPainter.DrawField();
+            this.fieldPainter.DrawGameScene();
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
             this.labelPlayerTurn.Text = this.gameLogic.ActivePlayerDescription + "'s turn";
             this.UpdateShipCount();
