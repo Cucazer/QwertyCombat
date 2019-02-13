@@ -125,39 +125,7 @@ namespace QwertyCombat
                 g.Clear(Colors.Black);
             }
 
-            // draw (call to draw) game relevant UI - ships left bars, End turn and Sound on/off buttons
-            var shipsAliveBarPoints = new List<PointF>
-            {
-                new PointF(0,0),
-                new PointF(100,0),
-                new PointF(110, 10),
-                new PointF(100, 20),
-                new PointF(0, 20)
-            };
-            var redShipsAliveBar = new Polygon(Point.Empty, Colors.Red, shipsAliveBarPoints);
-            var blueShipsAliveBar = new Polygon(Point.Empty, Colors.Blue, shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y)).ToList());
-            this.DrawPolygon(redShipsAliveBar, Colors.Red, new Point(this.CurrentBitmap.Width / 2, 10));
-            this.DrawPolygon(blueShipsAliveBar, Colors.Red, new Point(this.CurrentBitmap.Width / 2, 10));
-
-            var endTurnButtonPoints = new List<PointF>
-            {
-                new PointF(-50, 0),
-                new PointF(50, 0),
-                new PointF(35, 15),
-                new PointF(-35, 15)
-            };
-
-            var activeTeamPen = new Pen(Colors.Yellow,5);
-            var inactiveTeamPen = new Pen(Colors.Purple, 2);
-            // TODO: make active team accessible
-            using (var g = new Graphics(this.CurrentBitmap))
-            {
-                g.DrawPolygon(inactiveTeamPen, shipsAliveBarPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
-                g.DrawPolygon(activeTeamPen, shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y)).Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
-                //g.DrawLine(new Pen(Colors.Purple,4), new Point(this.CurrentBitmap.Width / 2, 10), new Point(this.CurrentBitmap.Width / 2, 30));
-                g.DrawPolygon(Colors.Purple, endTurnButtonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 30)).ToArray());
-                g.DrawText(Fonts.Monospace(10), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 30, 30), "End turn");
-            }
+            this.DrawGameUI();
 
             // call to draw game field itself, with according offset
 
@@ -167,6 +135,84 @@ namespace QwertyCombat
 #if DEBUG
             //this.DisplayCellCoordinates();
 #endif
+        }
+
+        private void DrawGameUI()
+        {
+            var shipsAliveBarPoints = new List<PointF>
+            {
+                new PointF(0, 0),
+                new PointF(100, 0),
+                new PointF(110, 10),
+                new PointF(100, 20),
+                new PointF(0, 20)
+            };
+            var shipsAliveBarOffset = new Point(this.CurrentBitmap.Width / 2, 10);
+            var redShipsAliveBarPoints = shipsAliveBarPoints.Select(p => p + shipsAliveBarOffset).ToArray();
+            var blueShipsAliveBarPoints = shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y) + shipsAliveBarOffset).ToArray();
+
+            var endTurnButtonPoints = new List<PointF>
+            {
+                new PointF(-50, 0),
+                new PointF(50, 0),
+                new PointF(35, 15),
+                new PointF(-35, 15)
+            };
+
+            var speakerIconPoints = new List<PointF>
+            {
+                new PointF(0, 10),
+                new PointF(5, 10),
+                new PointF(15, 0),
+                new PointF(15, 30),
+                new PointF(5, 20),
+                new PointF(0, 20)
+            };
+            var speakerNoSoundLinePoints = new List<Tuple<PointF, PointF>>
+            {
+                new Tuple<PointF, PointF>(new PointF(20, 10), new PointF(30, 20)),
+                new Tuple<PointF, PointF>(new PointF(20, 20), new PointF(30, 10))
+            };
+            var speakerSoundWaveRadiuses = new List<int> {5, 10, 15};
+            var speakerSoundWavesPen = new Pen(Colors.LightSlateGray, 3);
+
+            var activeTeamPen = new Pen(Colors.Yellow, 5);
+            var inactiveTeamPen = new Pen(Colors.Purple, 2);
+            // TODO: make active team accessible
+            using (var g = new Graphics(this.CurrentBitmap))
+            {
+                g.FillPolygon(Colors.Red, redShipsAliveBarPoints);
+                g.FillPolygon(Colors.Blue, blueShipsAliveBarPoints);
+
+                g.DrawPolygon(Colors.Purple,
+                    endTurnButtonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 30)).ToArray());
+                g.DrawText(Fonts.Monospace(10), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 30, 30), "End turn");
+                g.DrawPolygon(inactiveTeamPen,
+                    shipsAliveBarPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
+                g.DrawPolygon(activeTeamPen,
+                    shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y))
+                        .Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
+
+                g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 20, 11), "3");
+                g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 + 10, 11), "3");
+
+                var speakerOffset = new Point(this.CurrentBitmap.Width - 50, 10);
+                g.FillPolygon(Colors.LightSlateGray, speakerIconPoints.Select(p => p + speakerOffset).ToArray());
+                // sound off
+                foreach (var linePoints in speakerNoSoundLinePoints)
+                {
+                    g.DrawLine(speakerSoundWavesPen, linePoints.Item1 + speakerOffset,
+                        linePoints.Item2 + speakerOffset);
+                }
+
+                // sound on
+                foreach (var waveRadius in speakerSoundWaveRadiuses)
+                {
+                    g.DrawArc(speakerSoundWavesPen,
+                        new RectangleF(new PointF(15 - waveRadius, 15 - waveRadius) + speakerOffset,
+                            new SizeF(waveRadius * 2, waveRadius * 2)), -45, 90);
+                }
+            }
         }
 
         public void DrawGameField()
