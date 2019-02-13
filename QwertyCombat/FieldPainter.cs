@@ -13,6 +13,8 @@ namespace QwertyCombat
     {
         public Bitmap CurrentBitmap;
 
+        private const int GameUiHeight = 50;
+
         private ObjectManager objectManager;
         private readonly GameState defaultGameState;
         private GameState gameStateToDraw;
@@ -38,7 +40,7 @@ namespace QwertyCombat
             this.objectManager = objectManager;
             this.defaultGameState = objectManager.GameState;
             this.gameStateToDraw = objectManager.GameState;
-            this.CurrentBitmap = new Bitmap(fieldWidth, fieldHeight, PixelFormat.Format32bppRgba);
+            this.CurrentBitmap = new Bitmap(fieldWidth, GameUiHeight + fieldHeight, PixelFormat.Format32bppRgba);
         }
 
         public void UpdateBitmap(AnimationEventArgs animationToPerform = null)  
@@ -123,9 +125,9 @@ namespace QwertyCombat
             using (var g = new Graphics(this.CurrentBitmap))
             {
                 g.Clear(Colors.Black);
+                g.DrawImage(this.DrawGameUI(), new PointF(0, 0));
             }
 
-            this.DrawGameUI();
 
             // call to draw game field itself, with according offset
 
@@ -137,8 +139,10 @@ namespace QwertyCombat
 #endif
         }
 
-        private void DrawGameUI()
+        private Bitmap DrawGameUI()
         {
+            var uiBitmap = new Bitmap(this.CurrentBitmap.Width, GameUiHeight, PixelFormat.Format32bppRgba);
+
             var shipsAliveBarPoints = new List<PointF>
             {
                 new PointF(0, 0),
@@ -179,7 +183,7 @@ namespace QwertyCombat
             var activeTeamPen = new Pen(Colors.Yellow, 5);
             var inactiveTeamPen = new Pen(Colors.Purple, 2);
             // TODO: make active team accessible
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(uiBitmap))
             {
                 g.FillPolygon(Colors.Red, redShipsAliveBarPoints);
                 g.FillPolygon(Colors.Blue, blueShipsAliveBarPoints);
@@ -213,6 +217,8 @@ namespace QwertyCombat
                             new SizeF(waveRadius * 2, waveRadius * 2)), -45, 90);
                 }
             }
+
+            return uiBitmap;
         }
 
         public void DrawGameField()
@@ -220,8 +226,6 @@ namespace QwertyCombat
             // should always ensure .Dispose() is called when you are done with a Graphics object
             using (var g = new Graphics(this.CurrentBitmap))
             {
-                g.Clear(Colors.Black);
-
                 foreach (var hexagonCorners in this.combatMap.AllHexagonCorners)
                 {
                     g.DrawPolygon(Pens.Purple, hexagonCorners);
