@@ -54,7 +54,7 @@ namespace QwertyCombat.Objects
 
             this.ObjectAppearance = new List<DrawableShape>
             {
-                new Polygon(new Point(0, 0), new Color(), polygonPoints, true),
+                new Polygon(new Point(0, 0), polygonPoints),
                 new Polygon(new Point(0, 0), Colors.Aqua, windowPoints),
                 new Polygon(new Point(0, 0), Colors.LightGrey, weaponPoints),
                 new Polygon(new Point(0, 0), Colors.DarkSeaGreen, nozzlePoints),

@@ -45,7 +45,13 @@ namespace QwertyCombat
     {
         public List<PointF> Points { get; private set; }
         
-        public Polygon(Point origin, Color color, List<PointF> points, bool isTeamColor = false) : base(origin, color, isTeamColor)
+        //TODO: apply same or similar constructor refactoring to all other drawable shapes
+        public Polygon(Point origin, Color color, List<PointF> points) : base(origin, color)
+        {
+            this.Points = points;
+        }
+
+        public Polygon(Point origin, List<PointF> points) : base(origin, new Color(), true)
         {
             this.Points = points;
         }
