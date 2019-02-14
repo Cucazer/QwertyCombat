@@ -11,10 +11,23 @@ namespace QwertyCombat
 {
     class FieldPainter
     {
+        public enum BitmapElement
+        {
+            GameField,
+            EndTurnButton,
+            SoundButton,
+            None
+        }
+
         public Bitmap CurrentBitmap;
 
         private const int GameUiHeight = 50;
+        private const PixelFormat BitmapPixelFormat = PixelFormat.Format32bppRgba;
 
+        public Point GameFieldOffset => new Point(0, GameUiHeight);
+
+        private readonly int gameFieldWidth;
+        private readonly int gameFieldHeight;
         private ObjectManager objectManager;
         private readonly GameState defaultGameState;
         private GameState gameStateToDraw;
@@ -37,10 +50,41 @@ namespace QwertyCombat
 
         public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
         {
+            this.gameFieldWidth = fieldWidth;
+            this.gameFieldHeight = fieldHeight;
             this.objectManager = objectManager;
             this.defaultGameState = objectManager.GameState;
             this.gameStateToDraw = objectManager.GameState;
-            this.CurrentBitmap = new Bitmap(fieldWidth, GameUiHeight + fieldHeight, PixelFormat.Format32bppRgba);
+            this.CurrentBitmap = new Bitmap(fieldWidth, GameUiHeight + fieldHeight, BitmapPixelFormat);
+        }
+
+        public BitmapElement GetUiElementAtLocation(Point location)
+        {
+            if (location.Y > GameUiHeight)
+            {
+                return BitmapElement.GameField;
+            }
+
+            var endTurnButtonRectangle = new Rectangle(new Point(this.CurrentBitmap.Width / 2 - 50, 30), new Size(100, 15));
+
+            if (endTurnButtonRectangle.Contains(location))
+            {
+                return BitmapElement.EndTurnButton;
+            }
+
+            var soundButtonRectangle = new Rectangle(new Point(this.CurrentBitmap.Width - 50, 10), new Size(30,30));
+
+            if (soundButtonRectangle.Contains(location))
+            {
+                return BitmapElement.SoundButton;
+            }
+
+            return BitmapElement.None;
+        }
+
+        public Point GetGameFieldCoordinates(PointF bitmapCoordinates)
+        {
+            return new Point(bitmapCoordinates - this.GameFieldOffset);
         }
 
         public void UpdateBitmap(AnimationEventArgs animationToPerform = null)  
@@ -125,23 +169,18 @@ namespace QwertyCombat
             using (var g = new Graphics(this.CurrentBitmap))
             {
                 g.Clear(Colors.Black);
-                g.DrawImage(this.DrawGameUI(), new PointF(0, 0));
-            }
-
-
-            // call to draw game field itself, with according offset
-
-            //this.DrawGameField();
-            //this.DrawGameObjects();
-
+                g.DrawImage(this.DrawGameUI(), new Point(0,0));
+                g.DrawImage(this.DrawGameField(), this.GameFieldOffset);
+                g.DrawImage(this.DrawGameObjects(), this.GameFieldOffset);
 #if DEBUG
-            //this.DisplayCellCoordinates();
+                g.DrawImage(this.DisplayCellCoordinates(), this.GameFieldOffset);
 #endif
+            }
         }
 
         private Bitmap DrawGameUI()
         {
-            var uiBitmap = new Bitmap(this.CurrentBitmap.Width, GameUiHeight, PixelFormat.Format32bppRgba);
+            var uiBitmap = new Bitmap(this.CurrentBitmap.Width, GameUiHeight, BitmapPixelFormat);
 
             var shipsAliveBarPoints = new List<PointF>
             {
@@ -221,10 +260,12 @@ namespace QwertyCombat
             return uiBitmap;
         }
 
-        public void DrawGameField()
+        private Bitmap DrawGameField()
         {
+            var gameFieldBitmap = new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+
             // should always ensure .Dispose() is called when you are done with a Graphics object
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(gameFieldBitmap))
             {
                 foreach (var hexagonCorners in this.combatMap.AllHexagonCorners)
                 {
@@ -261,15 +302,19 @@ namespace QwertyCombat
                                                               this.gameStateToDraw.ActiveShip.ObjectCoordinates.Row));
                 }
             }
+
+            return gameFieldBitmap;
         }
 
-        private void DrawGameObjects()
+        private Bitmap DrawGameObjects()
         {
+            var objectsBitmap = new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+
             foreach (var ship in this.gameStateToDraw.Ships)
             {
                 if (!ship.IsMoving)
                 {
-                    this.DrawShip(ship);
+                    this.DrawShip(ship, objectsBitmap);
                 }
             }
 
@@ -277,14 +322,18 @@ namespace QwertyCombat
             {
                 if (!meteor.IsMoving)
                 {
-                    this.DrawMeteor(meteor);
+                    this.DrawMeteor(meteor, objectsBitmap);
                 }
             }
+
+            return objectsBitmap;
         }
 
-        private void DisplayCellCoordinates()
+        private Bitmap DisplayCellCoordinates()
         {
-            using (var g = new Graphics(this.CurrentBitmap))
+            var coordinatesBitmap = new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+
+            using (var g = new Graphics(coordinatesBitmap))
             {
                 // draw hexagon coordinates
                 for (int x = 0; x < this.combatMap.FieldWidth; x++)
@@ -301,6 +350,8 @@ namespace QwertyCombat
                     }
                 }
             }
+
+            return coordinatesBitmap;
         }
 
         bool tooltipShown = false;
@@ -342,114 +393,114 @@ namespace QwertyCombat
             }
         }
 
-        private void DrawSpaceObject(SpaceObject spaceObject)
+        private void DrawSpaceObject(SpaceObject spaceObject, Bitmap bitmap)
         {
-            this.DrawSpaceObject(spaceObject, this.combatMap.HexToPixel(spaceObject.ObjectCoordinates));
+            this.DrawSpaceObject(spaceObject, this.combatMap.HexToPixel(spaceObject.ObjectCoordinates), bitmap);
         }
 
-        private void DrawSpaceObject(SpaceObject spaceObject, Point spaceObjectCoordinates)
+        private void DrawSpaceObject(SpaceObject spaceObject, Point spaceObjectCoordinates, Bitmap bitmap)
         {
             switch (spaceObject)
             {
                 case Ship s:
-                    this.DrawShip(s, spaceObjectCoordinates);
+                    this.DrawShip(s, spaceObjectCoordinates, bitmap);
                     break;
                 case Meteor m:
-                    this.DrawMeteor(m, spaceObjectCoordinates);
+                    this.DrawMeteor(m, spaceObjectCoordinates, bitmap);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"Drawing of {spaceObject.GetType()} not supported");
             }
         }
 
-        private void DrawMeteor(Meteor meteor)
+        private void DrawMeteor(Meteor meteor, Bitmap bitmap)
         {
-            this.DrawMeteor(meteor, this.combatMap.HexToPixel(meteor.ObjectCoordinates));
+            this.DrawMeteor(meteor, this.combatMap.HexToPixel(meteor.ObjectCoordinates), bitmap);
         }
 
-        private void DrawMeteor(Meteor meteor, Point meteorCoordinates)
+        private void DrawMeteor(Meteor meteor, Point meteorCoordinates, Bitmap bitmap)
         {
             foreach (var shape in meteor.ObjectAppearance)
             {
-                this.DrawShape(shape, new Color(), meteorCoordinates);
+                this.DrawShape(shape, new Color(), meteorCoordinates, bitmap);
             }
 
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(bitmap))
             {
                 g.DrawText(Fonts.Sans(8), Brushes.Red, meteorCoordinates + new Size(5, -25), meteor.CurrentHealth.ToString());
             }
         }
 
-        private void DrawShip(Ship ship)
+        private void DrawShip(Ship ship, Bitmap bitmap)
         {
-            this.DrawShip(ship, this.combatMap.HexToPixel(ship.ObjectCoordinates));
+            this.DrawShip(ship, this.combatMap.HexToPixel(ship.ObjectCoordinates), bitmap);
         }
 
-        private void DrawShip(Ship ship, Point shipCoordinates)
+        private void DrawShip(Ship ship, Point shipCoordinates, Bitmap bitmap)
         {
             foreach (var shape in ship.ObjectAppearance)
             {
-                this.DrawShape(shape, teamColors[ship.Owner], shipCoordinates);
+                this.DrawShape(shape, this.teamColors[ship.Owner], shipCoordinates, bitmap);
             }
 
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(bitmap))
             {
                 g.DrawText(Fonts.Sans(8), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
                 g.DrawText(Fonts.Sans(8), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
             }
         }
 
-        private void DrawShape(DrawableShape shape, Color teamColor, Point offset)
+        private void DrawShape(DrawableShape shape, Color teamColor, Point offset, Bitmap bitmap)
         {
             switch (shape)
             {
                 case Arc a:
-                    this.DrawArc(a, teamColor, offset);
+                    this.DrawArc(a, teamColor, offset, bitmap);
                     break;
                 case Ellipse e:
-                    this.DrawEllipse(e, teamColor, offset);
+                    this.DrawEllipse(e, teamColor, offset, bitmap);
                     break;
                 case Polygon p:
-                    this.DrawPolygon(p, teamColor, offset);
+                    this.DrawPolygon(p, teamColor, offset, bitmap);
                     break;
                 case Path p:
-                    this.DrawPath(p, teamColor, offset);
+                    this.DrawPath(p, teamColor, offset, bitmap);
                     break;
                 default:
                     throw new ArgumentException($"Drawing of {shape.GetType()} not supported");
             }
         }
 
-        private void DrawArc(Arc arc, Color teamColor, Point offset)
+        private void DrawArc(Arc arc, Color teamColor, Point offset, Bitmap bitmap)
         {
             //TODO: fill vs thickness
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(bitmap))
             {
                 g.FillPie(arc.IsTeamColor ? teamColor : arc.Color, new RectangleF(arc.Origin + offset, arc.Size),
                     arc.StartAngle, arc.SweepAngle);
             }
         }
 
-        private void DrawEllipse(Ellipse ellipse, Color teamColor, Point offset)
+        private void DrawEllipse(Ellipse ellipse, Color teamColor, Point offset, Bitmap bitmap)
         {
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(bitmap))
             {
                 g.FillEllipse(ellipse.IsTeamColor ? teamColor : ellipse.Color, new RectangleF(ellipse.Origin + offset, ellipse.Size));
             }
         }
 
-        private void DrawPolygon(Polygon polygon, Color teamColor, Point offset)
+        private void DrawPolygon(Polygon polygon, Color teamColor, Point offset, Bitmap bitmap)
         {
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(bitmap))
             {
                 g.FillPolygon(polygon.IsTeamColor ? teamColor : polygon.Color,
                     polygon.Points.Select(p => p + offset).ToArray());
             }
         }
 
-        private void DrawPath(Path path, Color teamColor, Point offset)
+        private void DrawPath(Path path, Color teamColor, Point offset, Bitmap bitmap)
         {
-            using (var g = new Graphics(this.CurrentBitmap))
+            using (var g = new Graphics(bitmap))
             {
                 var graphicsPath = new GraphicsPath();
                 foreach (var component in path.Components)
@@ -489,7 +540,7 @@ namespace QwertyCombat
             {
                 currentCoordinates += stepDifference;
                 this.DrawGameScene();
-                this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates));
+                this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates), new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat));
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 if (++steps >= 10)
                 {
@@ -542,7 +593,7 @@ namespace QwertyCombat
             {
                 spaceObjectToAnimate.Rotate(dAngle);
                 this.DrawGameScene();
-                this.DrawSpaceObject(spaceObjectToAnimate);
+                this.DrawSpaceObject(spaceObjectToAnimate, new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat));
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 if (++steps >= totalStepCount)
                 {

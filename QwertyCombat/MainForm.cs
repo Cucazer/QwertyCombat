@@ -130,7 +130,21 @@ namespace QwertyCombat
 
         private void pictureMap_MouseClick(object sender, MouseEventArgs e)
         {
-            this.gameLogic.HandleFieldClick((Point)e.Location);
+            FieldPainter.BitmapElement elementClicked = this.fieldPainter.GetUiElementAtLocation((Point) e.Location);
+            switch (elementClicked)
+            {
+                case FieldPainter.BitmapElement.GameField:
+                    this.gameLogic.HandleFieldClick(this.fieldPainter.GetGameFieldCoordinates(e.Location));
+                    break;
+                case FieldPainter.BitmapElement.EndTurnButton:
+                    this.btnEndTurn_Click(sender, EventArgs.Empty);
+                    break;
+                case FieldPainter.BitmapElement.SoundButton:
+                    this.checkBoxAudio.Checked = !this.checkBoxAudio.Checked;
+                    break;
+                default:
+                    break;
+            }
             this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
             // unfortunately there is no Refresh method in Eto.Forms and Invalidate doesn't work as intended, but reassigning image to updated bitmap does the trick :)
             this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
@@ -139,7 +153,7 @@ namespace QwertyCombat
 
         private void pictureMap_MouseMove(object sender, MouseEventArgs e)
         {
-            var objectDescription = this.gameLogic.HandleFieldHover((Point)e.Location);
+            var objectDescription = this.gameLogic.HandleFieldHover(this.fieldPainter.GetGameFieldCoordinates(e.Location));
             if (objectDescription != null)
             {
                 this.fieldPainter.ActivateObjectTooltip((Point)e.Location, objectDescription);
