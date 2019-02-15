@@ -10,6 +10,8 @@ namespace QwertyCombat
 {
     class GameLogic
     {
+        //TODO: add direct access to gamestate
+
         private Ship activeShip
         {
             get { return this.objectManager.ActiveShip; }
@@ -33,7 +35,12 @@ namespace QwertyCombat
         }
 
         public readonly ObjectManager objectManager;
-        private Player activePlayer = Player.FirstPlayer;
+
+        private Player activePlayer
+        {
+            get => this.objectManager.GameState.ActivePlayer;
+            set => this.objectManager.GameState.ActivePlayer = value;
+        }
 
         public int FirstPlayerShipCount => this.objectManager.FirstPlayerShipCount;
         public int SecondPlayerShipCount=> this.objectManager.SecondPlayerShipCount;
@@ -43,6 +50,7 @@ namespace QwertyCombat
         public GameLogic(int fieldWidth, int fieldHeight)
         {
             this.objectManager = new ObjectManager(fieldWidth, fieldHeight);
+            this.activePlayer = Player.FirstPlayer;
         }
 
         public void HandleFieldClick(Point clickLocation)

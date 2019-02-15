@@ -13,6 +13,7 @@ namespace QwertyCombat
         public List<Meteor> Meteors => this.SpaceObjects.OfType<Meteor>().ToList();
         public List<Ship> Ships => this.SpaceObjects.OfType<Ship>().ToList();
 
+        public Player ActivePlayer { get; set; }
         public Ship ActiveShip { get; set; }
         public SpaceObject ActiveSpaceObject { get; set; }
 
@@ -37,6 +38,7 @@ namespace QwertyCombat
             {
                 clonedGameState.ActiveSpaceObject = clonedGameState.SpaceObjects.First(so => so.ObjectCoordinates.Equals(this.ActiveSpaceObject.ObjectCoordinates));
             }
+            clonedGameState.ActivePlayer = this.ActivePlayer;
             return clonedGameState;
         }
     }

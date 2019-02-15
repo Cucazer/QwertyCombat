@@ -230,9 +230,9 @@ namespace QwertyCombat
                 g.DrawPolygon(Colors.Purple,
                     endTurnButtonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 30)).ToArray());
                 g.DrawText(Fonts.Monospace(10), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 30, 30), "End turn");
-                g.DrawPolygon(inactiveTeamPen,
+                g.DrawPolygon(this.gameStateToDraw.ActivePlayer == Player.SecondPlayer ? activeTeamPen : inactiveTeamPen,
                     shipsAliveBarPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
-                g.DrawPolygon(activeTeamPen,
+                g.DrawPolygon(this.gameStateToDraw.ActivePlayer == Player.FirstPlayer ? activeTeamPen : inactiveTeamPen,
                     shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y))
                         .Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
 
