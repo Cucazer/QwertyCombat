@@ -29,6 +29,7 @@ namespace QwertyCombat
         private readonly int gameFieldWidth;
         private readonly int gameFieldHeight;
         private ObjectManager objectManager;
+        private readonly GameSettings gameSettings;
         private readonly GameState defaultGameState;
         private GameState gameStateToDraw;
 
@@ -48,11 +49,12 @@ namespace QwertyCombat
             { Player.None, Colors.Gray }
         };
 
-        public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager)
+        public FieldPainter(int fieldWidth, int fieldHeight, ObjectManager objectManager, GameSettings gameSettings)
         {
             this.gameFieldWidth = fieldWidth;
             this.gameFieldHeight = fieldHeight;
             this.objectManager = objectManager;
+            this.gameSettings = gameSettings;
             this.defaultGameState = objectManager.GameState;
             this.gameStateToDraw = objectManager.GameState;
             this.CurrentBitmap = new Bitmap(fieldWidth, GameUiHeight + fieldHeight, BitmapPixelFormat);
@@ -191,8 +193,10 @@ namespace QwertyCombat
                 new PointF(0, 20)
             };
             var shipsAliveBarOffset = new Point(this.CurrentBitmap.Width / 2, 10);
-            var redShipsAliveBarPoints = shipsAliveBarPoints.Select(p => p + shipsAliveBarOffset).ToArray();
-            var blueShipsAliveBarPoints = shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y) + shipsAliveBarOffset).ToArray();
+            var redShipCount = this.gameStateToDraw.Ships.Count(sh => sh.Owner == Player.SecondPlayer);
+            var blueShipCount = this.gameStateToDraw.Ships.Count(sh => sh.Owner == Player.FirstPlayer);
+            var redShipsAliveBarPoints = shipsAliveBarPoints.Select(p => p + (p.X == 0 ? new Point((3 - redShipCount) * 33, 0) : Point.Empty) + shipsAliveBarOffset).ToArray();
+            var blueShipsAliveBarPoints = shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y) + (p.X == 0 ? new Point((3 - blueShipCount) * -33, 0) : Point.Empty) + shipsAliveBarOffset).ToArray();
 
             var endTurnButtonPoints = new List<PointF>
             {
@@ -221,39 +225,56 @@ namespace QwertyCombat
 
             var activeTeamPen = new Pen(Colors.Yellow, 5);
             var inactiveTeamPen = new Pen(Colors.Purple, 2);
-            // TODO: make active team accessible
             using (var g = new Graphics(uiBitmap))
             {
-                g.FillPolygon(Colors.Red, redShipsAliveBarPoints);
-                g.FillPolygon(Colors.Blue, blueShipsAliveBarPoints);
+                if (redShipCount > 0)
+                {
+                    g.FillPolygon(Colors.Red, redShipsAliveBarPoints);
+                }
+
+                if (blueShipCount > 0)
+                {
+                    g.FillPolygon(Colors.Blue, blueShipsAliveBarPoints);
+                }
 
                 g.DrawPolygon(Colors.Purple,
                     endTurnButtonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 30)).ToArray());
                 g.DrawText(Fonts.Monospace(10), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 30, 30), "End turn");
-                g.DrawPolygon(this.gameStateToDraw.ActivePlayer == Player.SecondPlayer ? activeTeamPen : inactiveTeamPen,
-                    shipsAliveBarPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
-                g.DrawPolygon(this.gameStateToDraw.ActivePlayer == Player.FirstPlayer ? activeTeamPen : inactiveTeamPen,
-                    shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y))
-                        .Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
 
-                g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 20, 11), "3");
-                g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 + 10, 11), "3");
+                var activeTeamPolygonPoints = shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y)).ToList();
+                var inactiveTeamPolygonPoints = shipsAliveBarPoints;
+                if (this.gameStateToDraw.ActivePlayer == Player.SecondPlayer)
+                {
+                    activeTeamPolygonPoints = shipsAliveBarPoints;
+                    inactiveTeamPolygonPoints = shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y)).ToList();
+                }
+
+                g.DrawPolygon(inactiveTeamPen,
+                    inactiveTeamPolygonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
+                g.DrawPolygon(activeTeamPen,
+                    activeTeamPolygonPoints.Select(p => p + new Point(this.CurrentBitmap.Width / 2, 10)).ToArray());
+
+                g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 20, 11), blueShipCount.ToString());
+                g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 + 10, 11), redShipCount.ToString());
 
                 var speakerOffset = new Point(this.CurrentBitmap.Width - 50, 10);
                 g.FillPolygon(Colors.LightSlateGray, speakerIconPoints.Select(p => p + speakerOffset).ToArray());
-                // sound off
-                foreach (var linePoints in speakerNoSoundLinePoints)
+                if (this.gameSettings.SoundEnabled)
                 {
-                    g.DrawLine(speakerSoundWavesPen, linePoints.Item1 + speakerOffset,
-                        linePoints.Item2 + speakerOffset);
+                    foreach (var waveRadius in speakerSoundWaveRadiuses)
+                    {
+                        g.DrawArc(speakerSoundWavesPen,
+                            new RectangleF(new PointF(15 - waveRadius, 15 - waveRadius) + speakerOffset,
+                                new SizeF(waveRadius * 2, waveRadius * 2)), -45, 90);
+                    }
                 }
-
-                // sound on
-                foreach (var waveRadius in speakerSoundWaveRadiuses)
+                else
                 {
-                    g.DrawArc(speakerSoundWavesPen,
-                        new RectangleF(new PointF(15 - waveRadius, 15 - waveRadius) + speakerOffset,
-                            new SizeF(waveRadius * 2, waveRadius * 2)), -45, 90);
+                    foreach (var linePoints in speakerNoSoundLinePoints)
+                    {
+                        g.DrawLine(speakerSoundWavesPen, linePoints.Item1 + speakerOffset,
+                            linePoints.Item2 + speakerOffset);
+                    }
                 }
             }
 
