@@ -195,6 +195,7 @@ namespace QwertyCombat
             var shipsAliveBarOffset = new Point(this.CurrentBitmap.Width / 2, 10);
             var redShipCount = this.gameStateToDraw.Ships.Count(sh => sh.Owner == Player.SecondPlayer);
             var blueShipCount = this.gameStateToDraw.Ships.Count(sh => sh.Owner == Player.FirstPlayer);
+            //TODO: get rid of this hacky health bar width calculation
             var redShipsAliveBarPoints = shipsAliveBarPoints.Select(p => p + (p.X == 0 ? new Point((3 - redShipCount) * 33, 0) : Point.Empty) + shipsAliveBarOffset).ToArray();
             var blueShipsAliveBarPoints = shipsAliveBarPoints.Select(p => new PointF(-p.X, p.Y) + (p.X == 0 ? new Point((3 - blueShipCount) * -33, 0) : Point.Empty) + shipsAliveBarOffset).ToArray();
 
