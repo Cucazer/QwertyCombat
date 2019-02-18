@@ -24,6 +24,7 @@ namespace QwertyCombat
 
         private ObjectManager objectManager => this.gameLogic.objectManager;
         private readonly GameLogic gameLogic = new GameLogic(8, 6);
+        private readonly GameSettings gameSettings = new GameSettings();
         private readonly FieldPainter fieldPainter;
         private readonly SoundPlayer soundPlayer = new SoundPlayer();
 
@@ -96,7 +97,7 @@ namespace QwertyCombat
             Content = this.formLayout;
 
             // constructor code from previous solution            
-            this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager);
+            this.fieldPainter = new FieldPainter(this.gameLogic.BitmapWidth, this.gameLogic.BitmapHeight, this.objectManager, this.gameSettings);
             ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
@@ -140,7 +141,7 @@ namespace QwertyCombat
                     this.btnEndTurn_Click(sender, EventArgs.Empty);
                     break;
                 case FieldPainter.BitmapElement.SoundButton:
-                    this.checkBoxAudio.Checked = !this.checkBoxAudio.Checked;
+                    this.gameSettings.SoundEnabled = !this.gameSettings.SoundEnabled;
                     break;
                 default:
                     break;
@@ -187,7 +188,7 @@ namespace QwertyCombat
 
         private void OnSoundEffect(object sender, SoundEventArgs e)
         {
-            if (this.checkBoxAudio.Checked == false)
+            if (!this.gameSettings.SoundEnabled)
             {
                 return;
             }
