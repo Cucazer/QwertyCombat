@@ -24,6 +24,8 @@ namespace QwertyCombat
         private const int GameUiHeight = 50;
         private const PixelFormat BitmapPixelFormat = PixelFormat.Format32bppRgba;
 
+        private Bitmap EmptyGameFieldBitmap => new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+
         public Point GameFieldOffset => new Point(0, GameUiHeight);
 
         private readonly int gameFieldWidth;
@@ -166,7 +168,7 @@ namespace QwertyCombat
             }
         }
 
-        public void DrawGameScene()
+        public void DrawGameScene(Bitmap gameFieldOverlayBitmap = null)
         {
             using (var g = new Graphics(this.CurrentBitmap))
             {
@@ -174,6 +176,10 @@ namespace QwertyCombat
                 g.DrawImage(this.DrawGameUI(), new Point(0,0));
                 g.DrawImage(this.DrawGameField(), this.GameFieldOffset);
                 g.DrawImage(this.DrawGameObjects(), this.GameFieldOffset);
+                if (gameFieldOverlayBitmap != null)
+                {
+                    g.DrawImage(gameFieldOverlayBitmap, this.GameFieldOffset);
+                }
 #if DEBUG
                 g.DrawImage(this.DisplayCellCoordinates(), this.GameFieldOffset);
 #endif
@@ -284,7 +290,7 @@ namespace QwertyCombat
 
         private Bitmap DrawGameField()
         {
-            var gameFieldBitmap = new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+            var gameFieldBitmap = this.EmptyGameFieldBitmap;
 
             // should always ensure .Dispose() is called when you are done with a Graphics object
             using (var g = new Graphics(gameFieldBitmap))
@@ -330,7 +336,7 @@ namespace QwertyCombat
 
         private Bitmap DrawGameObjects()
         {
-            var objectsBitmap = new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+            var objectsBitmap = this.EmptyGameFieldBitmap;
 
             foreach (var ship in this.gameStateToDraw.Ships)
             {
@@ -353,7 +359,7 @@ namespace QwertyCombat
 
         private Bitmap DisplayCellCoordinates()
         {
-            var coordinatesBitmap = new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat);
+            var coordinatesBitmap = this.EmptyGameFieldBitmap;
 
             using (var g = new Graphics(coordinatesBitmap))
             {
@@ -392,6 +398,7 @@ namespace QwertyCombat
             {
                 textBoxLocation -= textBoxSize + new Size(10, 5); // fix for bottom-left and top-right corners!
             }
+            //i'm not going to use overlay here because we are working with already bitmap coordinates, tooltip location has no relationship with game field coordinates
             using (var g = new Graphics(this.CurrentBitmap))
             {
                 g.FillRectangle(Colors.Black, new Rectangle(textBoxLocation, textBoxSize));
@@ -561,8 +568,9 @@ namespace QwertyCombat
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
                 currentCoordinates += stepDifference;
-                this.DrawGameScene();
-                this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates), new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat));
+                var movingObjectBitmap = this.EmptyGameFieldBitmap;
+                this.DrawSpaceObject(spaceObject, Point.Round(currentCoordinates), movingObjectBitmap);
+                this.DrawGameScene(movingObjectBitmap);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 if (++steps >= 10)
                 {
@@ -582,11 +590,7 @@ namespace QwertyCombat
             var animationTimer = new UITimer { Interval = defaultTimerInterval };
             var overlaySpriteIndex = 0;
             animationTimer.Elapsed += delegate {
-                this.DrawGameScene();
-                using (var g = new Graphics(this.CurrentBitmap))
-                {
-                    g.DrawImage(pendingAnimationOverlaySprites[overlaySpriteIndex], 0, 0);
-                }
+                this.DrawGameScene(pendingAnimationOverlaySprites[overlaySpriteIndex]);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
 
                 if (++overlaySpriteIndex >= pendingAnimationOverlaySprites.Count)
@@ -614,8 +618,9 @@ namespace QwertyCombat
             animationTimer.Elapsed += (sender, eventArgs) =>
             {
                 spaceObjectToAnimate.Rotate(dAngle);
-                this.DrawGameScene();
-                this.DrawSpaceObject(spaceObjectToAnimate, new Bitmap(this.gameFieldWidth, this.gameFieldHeight, BitmapPixelFormat));
+                var rotatingObjectBitmap = this.EmptyGameFieldBitmap;
+                this.DrawSpaceObject(spaceObjectToAnimate, rotatingObjectBitmap);
+                this.DrawGameScene(rotatingObjectBitmap);
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
                 if (++steps >= totalStepCount)
                 {
@@ -643,10 +648,9 @@ namespace QwertyCombat
             var steps = 0;
 
             animationTimer.Elapsed += delegate {
-                this.DrawGameScene();
-                
+                var explosionBitmap = this.EmptyGameFieldBitmap;
                 var currentExplosionRadius = explosionRadius * (steps + 1) / (float)totalStepCount;
-                using (var g = new Graphics(this.CurrentBitmap))
+                using (var g = new Graphics(explosionBitmap))
                 {
                     for (int i = 0; i < 3; i++)
                     {
@@ -669,6 +673,7 @@ namespace QwertyCombat
                         g.FillPolygon(starColors[i], starVertices);
                     }
                 }
+                this.DrawGameScene(explosionBitmap);
 
                 this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
 
