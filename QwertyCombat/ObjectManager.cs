@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using Eto.Drawing;
 using System.Linq;
- using System.Runtime.CompilerServices;
- using System.Text;
-using System.Threading.Tasks;
 using QwertyCombat.Objects;
 using QwertyCombat.Objects.Weapons;
 using Hex = Barbar.HexGrid;
@@ -25,17 +22,10 @@ namespace QwertyCombat
         public static event EventHandler<AnimationEventArgs> ObjectAnimated;
         public static event EventHandler<SoundEventArgs> SoundPlayed;
         
-        public int FirstPlayerShipCount => this.Ships.Count(sh => sh.Owner == Player.FirstPlayer);
-        public int SecondPlayerShipCount => this.Ships.Count(sh => sh.Owner == Player.SecondPlayer);
         public int BitmapWidth => this.CombatMap.BitmapWidth;
         public int BitmapHeight => this.CombatMap.BitmapHeight;
-        public Ship ActiveShip
-        {
-            get { return this.GameState.ActiveShip; }
-            set { this.GameState.ActiveShip = value; }
-        }
 
-        public GameState GameState;
+        public readonly GameState GameState;
 
         public ObjectManager(int mapWidth, int mapHeight)
         {

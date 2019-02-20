@@ -10,28 +10,12 @@ namespace QwertyCombat
 {
     class GameLogic
     {
-        //TODO: add direct access to gamestate
+        private GameState GameState => this.objectManager.GameState;
 
         private Ship activeShip
         {
-            get { return this.objectManager.ActiveShip; }
-            set { this.objectManager.ActiveShip = value; }
-        }
-
-        public string ActivePlayerDescription
-        {
-            get
-            {
-                switch (this.activePlayer)
-                {
-                    case Player.FirstPlayer:
-                        return "First player";
-                    case Player.SecondPlayer:
-                        return "Second player";
-                    default:
-                        return this.activePlayer.ToString();
-                }
-            }
+            get => this.GameState.ActiveShip;
+            set => this.GameState.ActiveShip = value;
         }
 
         public readonly ObjectManager objectManager;
@@ -42,8 +26,6 @@ namespace QwertyCombat
             set => this.objectManager.GameState.ActivePlayer = value;
         }
 
-        public int FirstPlayerShipCount => this.objectManager.FirstPlayerShipCount;
-        public int SecondPlayerShipCount=> this.objectManager.SecondPlayerShipCount;
         public int BitmapWidth => this.objectManager.BitmapWidth;
         public int BitmapHeight => this.objectManager.BitmapHeight;
 
@@ -80,7 +62,7 @@ namespace QwertyCombat
                 return;
             }
             
-            // если выбранная клетка пуста - определяем возможность перемещения 
+            // cell is free to move to
             if (clickedObject == null)
             {
                 this.MoveActiveShip(clickedHexagon);
