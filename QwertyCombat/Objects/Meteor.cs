@@ -61,15 +61,15 @@ namespace QwertyCombat.Objects
 
                 var pathComponents = new List<DrawableShape>
                 {
-                    new Arc(new Point(-meteorRadius, -meteorRadius), new Color(),
+                    new Arc(new Point(-meteorRadius, -meteorRadius), 
                         new SizeF(2 * meteorRadius, 2 * meteorRadius),
                         180 - (float) (flameSweep.Value.ToDegrees() / 2),
                         (float) flameSweep.Value.ToDegrees()),
-                    new Arc(new PointF(-flameTipOffset - arcRadius, -2 * arcRadius), new Color(),
+                    new Arc(new PointF(-flameTipOffset - arcRadius, -2 * arcRadius),
                         new SizeF(2 * arcRadius, 2 * arcRadius),
                         90 - (float) flameSpanAngle.ToDegrees(),
                         (float) flameSpanAngle.ToDegrees()),
-                    new Arc(new PointF(-flameTipOffset - arcRadius, 0), new Color(),
+                    new Arc(new PointF(-flameTipOffset - arcRadius, 0),
                         new SizeF(2 * arcRadius, 2 * arcRadius),
                         -90,
                         (float) flameSpanAngle.ToDegrees())

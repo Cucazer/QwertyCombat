@@ -73,8 +73,8 @@ namespace QwertyCombat
             ObjectManager.ObjectAnimated += this.fieldPainter.OnAnimationPending;
             ObjectManager.SoundPlayed += this.OnSoundEffect;
             this.fieldPainter.BitmapUpdated += this.OnBitmapUpdated;
-            this.fieldPainter.DrawGameScene();
-            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
+
+            this.fieldPainter.UpdateBitmap();
             this.Shown += (sender, e) => {
                 //this.fieldLayout.Update();
                 //this.formLayout.Update();
@@ -92,7 +92,7 @@ namespace QwertyCombat
                     this.gameLogic.HandleFieldClick(this.fieldPainter.GetGameFieldCoordinates(e.Location));
                     break;
                 case FieldPainter.BitmapElement.EndTurnButton:
-                    this.btnEndTurn_Click(sender, EventArgs.Empty);
+                    this.gameLogic.EndTurn();
                     break;
                 case FieldPainter.BitmapElement.SoundButton:
                     this.gameSettings.SoundEnabled = !this.gameSettings.SoundEnabled;
@@ -100,9 +100,7 @@ namespace QwertyCombat
                 default:
                     break;
             }
-            this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
-            // unfortunately there is no Refresh method in Eto.Forms and Invalidate doesn't work as intended, but reassigning image to updated bitmap does the trick :)
-            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
+            this.fieldPainter.UpdateBitmap();
         }
 
         private void pictureMap_MouseMove(object sender, MouseEventArgs e)
@@ -116,13 +114,6 @@ namespace QwertyCombat
             {
                 this.fieldPainter.DeactivateTooltip();
             }
-        }
-
-        private void btnEndTurn_Click(object sender, EventArgs e)
-        {
-            this.gameLogic.EndTurn();
-            this.fieldPainter.UpdateBitmap(); // causes blinking of an animated object, bitmap won't be updated if this will be disabled and no animation happening
-            this.pictureMap.Image = this.fieldPainter.CurrentBitmap;
         }
 
         private void buttonDebug_Click(object sender, EventArgs e)

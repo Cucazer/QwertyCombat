@@ -91,7 +91,7 @@ namespace QwertyCombat
             return new Point(bitmapCoordinates - this.GameFieldOffset);
         }
 
-        public void UpdateBitmap(AnimationEventArgs animationToPerform = null)  
+        public void UpdateBitmap()  
         {
             if (this.performingAnimation)
             {
@@ -99,35 +99,13 @@ namespace QwertyCombat
                 return;
             }
             
-            if (animationToPerform == null)
-            {
-                this.DrawGameScene();
-                return;
-            }
-
-            switch (animationToPerform.AnimationType)
-            {
-                case AnimationType.Sprites:
-                    this.AnimateAttack(animationToPerform.SpaceObject, animationToPerform.OverlaySprites);
-                    break;
-                case AnimationType.Rotation:
-                    // maybe save game state
-                    this.AnimateRotation(animationToPerform.SpaceObject, animationToPerform.RotationAngle);
-                    break;
-                case AnimationType.Movement:
-                    this.AnimateMovingObjects(animationToPerform.SpaceObject, animationToPerform.MovementStart,
-                        animationToPerform.MovementDestination);
-                    break;
-                case AnimationType.Explosion:
-                    this.AnimateExplosion(animationToPerform.ExplosionCenter, animationToPerform.ExplosionRadius);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            this.DrawGameScene();
+            this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private bool performingAnimation = false;
-        public void HandleAnimationQueue(AnimationEventArgs animationToPerform = null)
+
+        private void HandleAnimationQueue(AnimationEventArgs animationToPerform = null)
         {
             if (animationToPerform != null)
             {
@@ -168,7 +146,7 @@ namespace QwertyCombat
             }
         }
 
-        public void DrawGameScene(Bitmap gameFieldOverlayBitmap = null)
+        private void DrawGameScene(Bitmap gameFieldOverlayBitmap = null)
         {
             using (var g = new Graphics(this.CurrentBitmap))
             {

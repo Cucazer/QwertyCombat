@@ -54,11 +54,11 @@ namespace QwertyCombat.Objects
 
             this.ObjectAppearance = new List<DrawableShape>
             {
-                new Polygon(new Point(0, 0), polygonPoints),
-                new Polygon(new Point(0, 0), Colors.Aqua, windowPoints),
-                new Polygon(new Point(0, 0), Colors.LightGrey, weaponPoints),
-                new Polygon(new Point(0, 0), Colors.DarkSeaGreen, nozzlePoints),
-                new Polygon(new Point(0, 0), Colors.DarkSeaGreen,
+                new Polygon(polygonPoints),
+                new Polygon(Colors.Aqua, windowPoints),
+                new Polygon(Colors.LightGrey, weaponPoints),
+                new Polygon(Colors.DarkSeaGreen, nozzlePoints),
+                new Polygon(Colors.DarkSeaGreen,
                     nozzlePoints.Select(p => new PointF(p.X, -p.Y)).ToList())
             };
 

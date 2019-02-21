@@ -27,8 +27,13 @@ namespace QwertyCombat
     public class Ellipse : DrawableShape
     {
         public SizeF Size { get; private set; }
-        
-        public Ellipse(PointF origin, Color color, SizeF size, bool isTeamColor = false) : base(origin, color, isTeamColor)
+
+        public Ellipse(PointF origin, Color color, SizeF size) : base(origin, color)
+        {
+            this.Size = size;
+        }
+
+        public Ellipse(PointF origin, SizeF size) : base(origin, new Color(), true)
         {
             this.Size = size;
         }
@@ -46,12 +51,12 @@ namespace QwertyCombat
         public List<PointF> Points { get; private set; }
         
         //TODO: apply same or similar constructor refactoring to all other drawable shapes
-        public Polygon(Point origin, Color color, List<PointF> points) : base(origin, color)
+        public Polygon(Color color, List<PointF> points) : base(PointF.Empty, color)
         {
             this.Points = points;
         }
 
-        public Polygon(Point origin, List<PointF> points) : base(origin, new Color(), true)
+        public Polygon(List<PointF> points) : base(PointF.Empty, new Color(), true)
         {
             this.Points = points;
         }
@@ -73,7 +78,13 @@ namespace QwertyCombat
         public float StartAngle { get; private set; }
         public float SweepAngle { get; private set; }
 
-        public Arc(PointF origin, Color color, SizeF size, float startAngle, float sweepAngle, bool isTeamColor = false) : base(origin, color, size, isTeamColor)
+        public Arc(PointF origin, Color color, SizeF size, float startAngle, float sweepAngle) : base(origin, color, size)
+        {
+            this.StartAngle = startAngle;
+            this.SweepAngle = sweepAngle;
+        }
+
+        public Arc(PointF origin, SizeF size, float startAngle, float sweepAngle) : base(origin, size)
         {
             this.StartAngle = startAngle;
             this.SweepAngle = sweepAngle;
