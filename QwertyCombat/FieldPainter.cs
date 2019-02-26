@@ -434,7 +434,8 @@ namespace QwertyCombat
 
             using (var g = new Graphics(bitmap))
             {
-                g.DrawText(Fonts.Sans(8), Brushes.Red, meteorCoordinates + new Size(5, -25), meteor.CurrentHealth.ToString());
+                g.FillRectangle(Colors.Red, new RectangleF(meteorCoordinates + new Size(-10, -25), new SizeF(20 * meteor.CurrentHealth / meteor.MaxHealth, 4)));
+                g.DrawRectangle(Colors.White, new RectangleF(meteorCoordinates + new Size(-10, -25), new SizeF(20, 4)));
             }
         }
 
@@ -452,8 +453,10 @@ namespace QwertyCombat
 
             using (var g = new Graphics(bitmap))
             {
-                g.DrawText(Fonts.Sans(8), Brushes.Blue, shipCoordinates + new Size(0, 15), ship.ActionsLeft.ToString());
-                g.DrawText(Fonts.Sans(8), Brushes.Red, shipCoordinates + new Size(0, -25), ship.CurrentHealth.ToString());
+                g.FillRectangle(Colors.Blue, new RectangleF(shipCoordinates + new Size(-10, 15), new SizeF(20 * ship.ActionsLeft / ship.MaxActions, 4)));
+                g.DrawRectangle(Colors.White, new RectangleF(shipCoordinates + new Size(-10, 15), new SizeF(20, 4)));
+                g.FillRectangle(Colors.Red, new RectangleF(shipCoordinates + new Size(-10, -25), new SizeF(20 * ship.CurrentHealth / ship.MaxHealth,4)));
+                g.DrawRectangle(Colors.White, new RectangleF(shipCoordinates + new Size(-10, -25), new SizeF(20,4)));
             }
         }
 

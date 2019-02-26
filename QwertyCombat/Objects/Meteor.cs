@@ -19,7 +19,7 @@ namespace QwertyCombat.Objects
             this.ObjectCoordinates = meteorCoordinates;
             this.CollisionDamage = damage;
 
-            int meteorRadius = 15;
+            int meteorRadius = 15; //TODO: make meteor size dependent on it's damage
 
             this.ObjectAppearance = new List<DrawableShape>
             {
