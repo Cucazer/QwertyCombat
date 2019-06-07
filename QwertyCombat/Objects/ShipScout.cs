@@ -51,6 +51,25 @@ namespace QwertyCombat.Objects
             };
 
             this.WeaponPoint = new PointF(weaponPoints[1].X, 0);
+            this.FlameBounds = new List<Polygon>
+            {
+                new Polygon(Colors.Red,
+                    new List<PointF>
+                    {
+                        nozzlePoints[0],
+                        nozzlePoints[0] - new SizeF(10, 0),
+                        nozzlePoints[5] - new SizeF(10, 0),
+                        nozzlePoints[5]
+                    }),
+                new Polygon(Colors.Red,
+                    new List<PointF>
+                    {
+                        nozzlePoints[0],
+                        nozzlePoints[0] - new SizeF(10, 0),
+                        nozzlePoints[5] - new SizeF(10, 0),
+                        nozzlePoints[5]
+                    }.Select(p => new PointF(p.X, -p.Y)).ToList())
+            };
 
             this.ObjectAppearance = new List<DrawableShape>
             {

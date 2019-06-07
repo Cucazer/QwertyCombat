@@ -451,6 +451,14 @@ namespace QwertyCombat
                 this.DrawShape(shape, this.teamColors[ship.Owner], shipCoordinates, bitmap);
             }
 
+            if (ship.IsMoving)
+            {
+                foreach (var flameBounds in ship.FlameBounds)
+                {
+                    this.DrawPolygon(flameBounds, new Color(), shipCoordinates, bitmap);
+                }
+            }
+
             using (var g = new Graphics(bitmap))
             {
                 g.FillRectangle(Colors.Blue, new RectangleF(shipCoordinates + new Size(-10, 15), new SizeF(20 * ship.ActionsLeft / ship.MaxActions, 4)));

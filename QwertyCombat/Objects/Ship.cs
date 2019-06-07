@@ -14,6 +14,7 @@ namespace QwertyCombat.Objects
     {
         public readonly Weapon EquippedWeapon;
         public PointF WeaponPoint;
+        public List<Polygon> FlameBounds;
 
         public Ship(Player playerId, WeaponType wpnType, int maxHealth, int maxActions): base(playerId, maxHealth, ObjectType.Ship, maxActions)
         {
@@ -59,6 +60,10 @@ namespace QwertyCombat.Objects
                 shape.Rotate((float)angle);
             }
             this.WeaponPoint.Rotate((float)angle);
+            foreach (var flameBounds in this.FlameBounds)
+            {
+                flameBounds.Rotate((float)angle);  
+            }
         }
 
         public void RefillEnergy()
