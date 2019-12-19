@@ -370,21 +370,37 @@ namespace QwertyCombat
             this.tooltipShown = true;
             this.DrawGameScene();
             //TODO: extract to DrawTooltip?
-            var textBoxSize = new Size(120, 70);
-            var textBoxLocation = location + new Size(10, 5);
+            var objectName = objectProperties["Name"];
+            objectProperties.Remove("Name");
+            var maxLineLength = Math.Max(objectName.Length, objectProperties.Max(keyValue => keyValue.Key.Length + keyValue.Value.Length) + 3); // min 3 dots between key and value
+            var textBoxSize = new Size(6 * maxLineLength, 15 * (objectProperties.Count + 1));
+            var textBoxLocation = location + new Size(0, 20);
             if (!this.CurrentBitmap.Size.Contains(location + textBoxSize))
             {
-                textBoxLocation -= textBoxSize + new Size(10, 5); // fix for bottom-left and top-right corners!
+                textBoxLocation -= textBoxSize + new Size(0, 20);
+                if (textBoxLocation.X < 0)
+                {
+                    textBoxLocation += new Size(textBoxSize.Width, 0);
+                }
+                if (textBoxLocation.Y < 0)
+                {
+                    textBoxLocation += new Size(0, textBoxSize.Height);
+                }
             }
+
             //i'm not going to use overlay here because we are working with already bitmap coordinates, tooltip location has no relationship with game field coordinates
             using (var g = new Graphics(this.CurrentBitmap))
             {
                 g.FillRectangle(Colors.Black, new Rectangle(textBoxLocation, textBoxSize));
                 g.DrawRectangle(Colors.Red, new Rectangle(textBoxLocation, textBoxSize));
-                var lineIndex = 0;
+                g.DrawLine(Colors.Red, textBoxLocation + new Size(5, 20), textBoxLocation + new Size(textBoxSize.Width - 5, 20));
+                //TODO: team color for name?
+                g.DrawText(Fonts.Fantasy(12, FontStyle.Bold), Colors.SkyBlue, textBoxLocation + new Size(5 + (textBoxSize.Width - 6 * objectName.Length) / 2, 4), objectName);
+
+                var lineIndex = 1;
                 foreach (var property in objectProperties)
                 {
-                    g.DrawText(Fonts.Sans(7), Colors.Lime, textBoxLocation + new Size(5, 5 + 12 * lineIndex++), $"{property.Key}...{property.Value}");
+                    g.DrawText(Fonts.Monospace(7), Colors.Lime, textBoxLocation + new Size(5, 10 + 12 * lineIndex++), $"{property.Key}{property.Value.PadLeft(maxLineLength - property.Key.Length, '.')}");
                 }
             }
             this.BitmapUpdated?.Invoke(this, EventArgs.Empty);
