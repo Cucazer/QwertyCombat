@@ -80,7 +80,7 @@ namespace QwertyCombat.Objects
 
         public override Dictionary<string, string> Properties => new Dictionary<string, string>
         {
-            {"", this.Name},
+            {"Name", this.Name},
             {"Collision damage", $"{this.CollisionDamage}"},
             {"HP", $"{this.CurrentHealth}"},
             {"Movement direction", $"{this.MovementDirection}"}
