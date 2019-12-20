@@ -33,8 +33,10 @@ namespace QwertyCombat
             this.pictureMap.MouseDown += this.pictureMap_MouseClick;
             this.pictureMap.MouseMove += this.pictureMap_MouseMove;
 
+            this.KeyDown += this.Form_KeyDown;
+
             this.buttonDebug = new Button { Text = "DEBUG" };
-            this.buttonDebug.Click += this.buttonDebug_Click;
+            this.buttonDebug.MouseDoubleClick += this.buttonDebug_Click;
 #if !DEBUG
             this.buttonDebug.Visible = false;
 #endif
@@ -114,6 +116,20 @@ namespace QwertyCombat
             {
                 this.fieldPainter.DeactivateTooltip();
             }
+        }
+
+        private void Form_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Keys.Space:
+                    this.gameLogic.EndTurn();
+                    break;
+                case Keys.M:
+                    this.gameSettings.SoundEnabled = !this.gameSettings.SoundEnabled;
+                    break;
+            }
+            this.fieldPainter.UpdateBitmap();
         }
 
         private void buttonDebug_Click(object sender, EventArgs e)
