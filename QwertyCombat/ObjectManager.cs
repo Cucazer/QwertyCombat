@@ -34,13 +34,13 @@ namespace QwertyCombat
             this.CombatMap = new CombatMap(mapWidth, mapHeight);
             this.GameState = new GameState(mapWidth * mapHeight);
 
-            this.CreateShip(ShipType.Scout, WeaponType.LightIon, Player.FirstPlayer);
-            this.CreateShip(ShipType.Scout, WeaponType.LightIon, Player.FirstPlayer);
+            //this.CreateShip(ShipType.Scout, WeaponType.LightIon, Player.FirstPlayer);
+            //this.CreateShip(ShipType.Scout, WeaponType.LightIon, Player.FirstPlayer);
             this.CreateShip(ShipType.Assaulter, WeaponType.HeavyLaser, Player.FirstPlayer);
 
             this.CreateShip(ShipType.Scout, WeaponType.LightLaser, Player.SecondPlayer);
-            this.CreateShip(ShipType.Scout, WeaponType.LightLaser, Player.SecondPlayer);
-            this.CreateShip(ShipType.Assaulter, WeaponType.HeavyLaser, Player.SecondPlayer);
+            //this.CreateShip(ShipType.Scout, WeaponType.LightLaser, Player.SecondPlayer);
+            //this.CreateShip(ShipType.Assaulter, WeaponType.HeavyLaser, Player.SecondPlayer);
 
             this.CreateMeteor();
         }

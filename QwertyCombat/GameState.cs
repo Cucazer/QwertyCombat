@@ -13,6 +13,13 @@ namespace QwertyCombat
         public List<Meteor> Meteors => this.SpaceObjects.OfType<Meteor>().ToList();
         public List<Ship> Ships => this.SpaceObjects.OfType<Ship>().ToList();
 
+        public bool FirstPlayerWon => this.Ships.Count(s => s.Owner == Player.FirstPlayer) > 0 &&
+                                      this.Ships.Count(s => s.Owner == Player.SecondPlayer) == 0;
+        public bool SecondPlayerWon => this.Ships.Count(s => s.Owner == Player.FirstPlayer) == 0 &&
+                                      this.Ships.Count(s => s.Owner == Player.SecondPlayer) > 0;
+
+        public bool GameOver => this.FirstPlayerWon || this.SecondPlayerWon;
+
         public Player ActivePlayer { get; set; }
         public Ship ActiveShip { get; set; }
         public SpaceObject ActiveSpaceObject { get; set; }

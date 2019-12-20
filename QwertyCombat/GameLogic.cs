@@ -37,6 +37,11 @@ namespace QwertyCombat
 
         public void HandleFieldClick(Point clickLocation)
         {
+            if (this.GameState.GameOver)
+            {
+                return;
+            }
+
             OffsetCoordinates clickedHexagon;
             SpaceObject clickedObject;
             try
@@ -169,6 +174,10 @@ namespace QwertyCombat
 
         public void EndTurn()
         {
+            if (this.GameState.GameOver)
+            {
+                return;
+            }
             this.activePlayer = this.activePlayer == Player.FirstPlayer ? Player.SecondPlayer : Player.FirstPlayer;
             this.activeShip = null;
             this.MoveMeteors();

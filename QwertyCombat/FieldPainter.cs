@@ -158,10 +158,27 @@ namespace QwertyCombat
                 {
                     g.DrawImage(gameFieldOverlayBitmap, this.GameFieldOffset);
                 }
+
+                if (this.gameStateToDraw.GameOver)
+                {
+                    g.DrawImage(this.DrawGameOverScreen(), this.GameFieldOffset);
+                }
 #if DEBUG
                 g.DrawImage(this.DisplayCellCoordinates(), this.GameFieldOffset);
 #endif
             }
+        }
+
+        private Bitmap DrawGameOverScreen()
+        {
+            var gameOverBitmap = this.EmptyGameFieldBitmap;
+
+            using (var g = new Graphics(gameOverBitmap))
+            {
+                g.DrawText(Fonts.Sans(40, FontStyle.Bold), Colors.Red, 10, this.gameFieldHeight / 2, "GAME OVER");
+            }
+
+            return gameOverBitmap;
         }
 
         private Bitmap DrawGameUI()
