@@ -20,6 +20,24 @@ namespace QwertyCombat
 
         public bool GameOver => this.FirstPlayerWon || this.SecondPlayerWon;
 
+        public Player GameWinner
+        {
+            get
+            {
+                if (this.FirstPlayerWon)
+                {
+                    return Player.FirstPlayer;
+                }
+
+                if (this.SecondPlayerWon)
+                {
+                    return Player.SecondPlayer;
+                }
+
+                return Player.None;
+            }
+        }
+
         public Player ActivePlayer { get; set; }
         public Ship ActiveShip { get; set; }
         public SpaceObject ActiveSpaceObject { get; set; }

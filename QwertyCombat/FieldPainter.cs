@@ -175,7 +175,25 @@ namespace QwertyCombat
 
             using (var g = new Graphics(gameOverBitmap))
             {
-                g.DrawText(Fonts.Sans(40, FontStyle.Bold), Colors.Red, 10, this.gameFieldHeight / 2, "GAME OVER");
+                var maskColor = new Color(Colors.Black, 0.65F);
+                g.Clear(maskColor);
+                g.DrawText(Fonts.Sans(40, FontStyle.Bold), Colors.MediumPurple, this.gameFieldWidth / 2 - 165, this.gameFieldHeight / 2 - 130, "GAME OVER");
+                var winnerText = this.gameStateToDraw.FirstPlayerWon ? "First player wins" : "Second player wins";
+                var textXOffset = this.gameFieldWidth / 2 - (this.gameStateToDraw.FirstPlayerWon ? 190 : 230);
+                g.DrawText(Fonts.Sans(40), this.teamColors[this.gameStateToDraw.GameWinner], textXOffset, this.gameFieldHeight / 2 - 60, winnerText);
+
+                var restartButtonPoints = new List<PointF>
+                {
+                    new PointF(-70, 0),
+                    new PointF(-55, -15),
+                    new PointF(55, -15),
+                    new PointF(70, 0),
+                    new PointF(55, 15),
+                    new PointF(-55, 15)
+                };
+                g.DrawPolygon(new Pen(Colors.Purple, 6),
+                    restartButtonPoints.Select(p => p + new Point(this.gameFieldWidth / 2, this.gameFieldHeight / 2 + 55)).ToArray());
+                g.DrawText(Fonts.Monospace(20), Colors.White, new Point(this.gameFieldWidth / 2 - 55, this.gameFieldHeight / 2 + 40), "Restart");
             }
 
             return gameOverBitmap;
@@ -258,6 +276,12 @@ namespace QwertyCombat
 
                 g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 - 20, 11), blueShipCount.ToString());
                 g.DrawText(Fonts.Monospace(12), Colors.White, new Point(this.CurrentBitmap.Width / 2 + 10, 11), redShipCount.ToString());
+
+                if (this.gameStateToDraw.GameOver)
+                {
+                    var maskColor = new Color(Colors.Black, 0.65F);
+                    g.FillRectangle(maskColor, g.ClipBounds);
+                }
 
                 var speakerOffset = new Point(this.CurrentBitmap.Width - 50, 10);
                 g.FillPolygon(Colors.LightSlateGray, speakerIconPoints.Select(p => p + speakerOffset).ToArray());
@@ -380,7 +404,7 @@ namespace QwertyCombat
         bool tooltipShown = false;
         public void ActivateObjectTooltip(Point location, Dictionary<string, string> objectProperties)
         {
-            if (this.performingAnimation)
+            if (this.performingAnimation || this.gameStateToDraw.GameOver)
             { 
                 return;
             }
