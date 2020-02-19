@@ -16,6 +16,7 @@ namespace QwertyCombat
             GameField,
             EndTurnButton,
             SoundButton,
+            RestartButton,
             None
         }
 
@@ -30,12 +31,24 @@ namespace QwertyCombat
 
         private readonly int gameFieldWidth;
         private readonly int gameFieldHeight;
-        private ObjectManager objectManager;
+
+        private ObjectManager _objectManager;
+        public ObjectManager ObjectManager
+        {
+            get => this._objectManager;
+            set
+            {
+                this._objectManager = value;
+                this.defaultGameState = this.ObjectManager.GameState;
+                this.gameStateToDraw = this.ObjectManager.GameState;
+            }
+        }
+
         private readonly GameSettings gameSettings;
-        private readonly GameState defaultGameState;
+        private GameState defaultGameState;
         private GameState gameStateToDraw;
 
-        private CombatMap combatMap => this.objectManager.CombatMap;
+        private CombatMap combatMap => this.ObjectManager.CombatMap;
 
         //private UITimer animationTimer = new UITimer();
         private Queue<AnimationEventArgs> AnimationQueue = new Queue<AnimationEventArgs>();
@@ -44,7 +57,7 @@ namespace QwertyCombat
 
         private double defaultTimerInterval => Eto.Platform.Detect.IsGtk ? 0.07 : 0.01;
 
-        private Dictionary<Player, Color> teamColors = new Dictionary<Player, Color>
+        private readonly Dictionary<Player, Color> teamColors = new Dictionary<Player, Color>
         {
             { Player.FirstPlayer, Colors.Blue },
             { Player.SecondPlayer, Colors.Red },
@@ -55,16 +68,14 @@ namespace QwertyCombat
         {
             this.gameFieldWidth = fieldWidth;
             this.gameFieldHeight = fieldHeight;
-            this.objectManager = objectManager;
+            this.ObjectManager = objectManager;
             this.gameSettings = gameSettings;
-            this.defaultGameState = objectManager.GameState;
-            this.gameStateToDraw = objectManager.GameState;
             this.CurrentBitmap = new Bitmap(fieldWidth, GameUiHeight + fieldHeight, BitmapPixelFormat);
         }
 
         public BitmapElement GetUiElementAtLocation(Point location)
         {
-            if (location.Y > GameUiHeight)
+            if (location.Y > GameUiHeight && !this.gameStateToDraw.GameOver)
             {
                 return BitmapElement.GameField;
             }
@@ -81,6 +92,16 @@ namespace QwertyCombat
             if (soundButtonRectangle.Contains(location))
             {
                 return BitmapElement.SoundButton;
+            }
+
+            if (this.gameStateToDraw.GameOver)
+            {
+                var restartButtonRectangle = new Rectangle(new Point(this.gameFieldWidth / 2 - 70, GameUiHeight + this.gameFieldHeight / 2 + 40), new Size(140, 30));
+
+                if (restartButtonRectangle.Contains(location))
+                {
+                    return BitmapElement.RestartButton;
+                }
             }
 
             return BitmapElement.None;
@@ -330,7 +351,7 @@ namespace QwertyCombat
 
                     // highlight active ship attack targets
                     var highlightColor = new Color(Colors.Red, 0.35F);
-                    foreach (var targetCell in this.objectManager.GetAttackTargets(this.gameStateToDraw.ActiveShip))
+                    foreach (var targetCell in this.ObjectManager.GetAttackTargets(this.gameStateToDraw.ActiveShip))
                     {
                         g.FillPolygon(highlightColor, this.combatMap.GetHexagonCorners(targetCell));
                     }
@@ -338,7 +359,7 @@ namespace QwertyCombat
 
                     // highlight active ship movement range
                     highlightColor = new Color(Colors.Lime, 0.35F);
-                    foreach (var availableCell in this.objectManager.GetMovementRange(this.gameStateToDraw.ActiveShip))
+                    foreach (var availableCell in this.ObjectManager.GetMovementRange(this.gameStateToDraw.ActiveShip))
                     {
                         g.FillPolygon(highlightColor, this.combatMap.GetHexagonCorners(availableCell));
                     }

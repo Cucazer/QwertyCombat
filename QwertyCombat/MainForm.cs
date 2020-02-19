@@ -16,7 +16,7 @@ namespace QwertyCombat
         private TableLayout formLayout;
 
         private ObjectManager objectManager => this.gameLogic.objectManager;
-        private readonly GameLogic gameLogic = new GameLogic(8, 6);
+        private GameLogic gameLogic = new GameLogic(8, 6);
         private readonly GameSettings gameSettings = new GameSettings();
         private readonly FieldPainter fieldPainter;
         private readonly SoundPlayer soundPlayer = new SoundPlayer();
@@ -98,6 +98,10 @@ namespace QwertyCombat
                     break;
                 case FieldPainter.BitmapElement.SoundButton:
                     this.gameSettings.SoundEnabled = !this.gameSettings.SoundEnabled;
+                    break;
+                case FieldPainter.BitmapElement.RestartButton:
+                    this.gameLogic = new GameLogic(8, 6);
+                    this.fieldPainter.ObjectManager = this.gameLogic.objectManager;
                     break;
                 default:
                     break;
